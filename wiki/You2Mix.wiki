@@ -1,0 +1,13 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+New way to handle video mixing online
+
+
+= Details =
+
+Mix YouTube videos online:
+  * Mix YouTube videos *online*
+  * Save mixes online and decide the level of *sharing*
+  * Include *You2Mix Gadgets* in your Web.
