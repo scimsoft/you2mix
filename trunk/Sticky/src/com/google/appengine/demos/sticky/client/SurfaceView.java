@@ -15,24 +15,15 @@
 
 package com.google.appengine.demos.sticky.client;
 
-import java.util.ArrayList;
-
 import com.bramosystems.oss.player.core.client.AbstractMediaPlayer;
-import com.bramosystems.oss.player.core.client.ConfigParameter;
 import com.bramosystems.oss.player.core.client.LoadException;
-import com.bramosystems.oss.player.core.client.PluginNotFoundException;
-import com.bramosystems.oss.player.core.client.PluginVersionException;
-import com.bramosystems.oss.player.core.client.TransparencyMode;
+import com.bramosystems.oss.player.core.client.skin.CSSSeekBar;
 import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
-import com.bramosystems.oss.player.youtube.client.ChromelessPlayer;
-import com.bramosystems.oss.player.youtube.client.PlayerParameters;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
 import com.google.appengine.demos.sticky.client.model.Video;
 import com.google.appengine.demos.sticky.client.model.VideoSearchResults;
-import com.google.appengine.demos.sticky.client.model.Model.VideoSearchStreamObserver;
-import com.google.appengine.demos.sticky.client.model.VideoSearchResults.VideoSearchResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -54,16 +45,14 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageBundle;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.WidgetCollection;
 
 /**
@@ -114,6 +103,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			// Build simple DOM Structure.
 			final Element elem = getElement();
 			elem.getStyle().setProperty("position", "absolute");
+			
 			titleElement = elem.appendChild(Document.get().createDivElement());
 			titleElement.setClassName("note-title");
 
@@ -123,6 +113,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			render();
 			videoView = new VideoView(note);
 			setWidget(videoView);
+			
+			
 			// youTubeId.setValue(note.getVideoKey().getYouTubeID());
 			addDomHandler(this, MouseDownEvent.getType());
 			addDomHandler(this, MouseMoveEvent.getType());
@@ -200,7 +192,6 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 
 		private void render() {
 			setPixelPosition(note.getX(), note.getY());
-
 			setPixelSize(note.getWidth(), note.getHeight());
 
 			titleElement.setInnerHTML(note.getAuthorName());
@@ -227,6 +218,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			protected final TextBox youTubeIdBox;
 			final AbstractMediaPlayer noteVideo;
 			private final Note note;
+			private TextBox startTime;
+			private TextBox endTime;
 			
 			public VideoView(final Note note)  {
 				this.note = note;
@@ -237,7 +230,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 						"http://www.youtube.com/v/");
 				urlString.append(youTubeIDString);
 
-				noteVideo = createPlayerWidget(
+				noteVideo = You2MixMediaPlayer.createPlayerWidget(
 						urlString.toString(), "170", "170");
 
 				youTubeIdBox = new TextBox();
@@ -277,12 +270,40 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 						}));
 
 				setYouTubeIdBoxValue(youTubeIDString);
+				CSSSeekBar css = new CSSSeekBar(10);
 				CustomPlayerControl cpc = new CustomPlayerControl(noteVideo);
 				FlowPanel fp = new FlowPanel();
 				fp.add(youTubeIDPanel);
 				fp.add(noteVideo);
 				fp.add(cpc);
+				fp.add(css);
+				HorizontalPanel timerPanel = getTimingPanel();
+				fp.add(timerPanel);
 				add(fp);
+				
+			}
+
+			private HorizontalPanel getTimingPanel() {
+				HorizontalPanel timerPanel = new HorizontalPanel();
+				timerPanel.setStyleName("video-timer-panel");
+				
+				Label startTimeLabel = new Label("Start:");
+				startTimeLabel.setStyleName("video-timer-label");
+				startTime = new TextBox();
+				startTime.setValue("0");
+				startTime.setStyleName("video-start-box");
+				
+				Label endTimeLabel = new Label("End:");
+				endTimeLabel.setStyleName("video-timer-label");
+				endTime = new TextBox();
+				endTime.setValue("0");
+				endTime.setStyleName("video-start-box");
+				
+				timerPanel.add(startTimeLabel);
+				timerPanel.add(startTime);
+				timerPanel.add(endTimeLabel);
+				timerPanel.add(endTime);
+				return timerPanel;
 			}
 
 			private void setYouTubeIdBoxValue(String youTubeIDString) {
@@ -307,6 +328,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			public void onVideoUpdate(Video video) {
 				note.setVideo(video);
 				youTubeIdBox.setText(video.getYouTubeID());
+				startTime.setValue(Integer.toString(video.getStartTime()));
+				endTime.setValue(Integer.toString(video.getEndTime()));
 				try {
 					loadNewVideo();
 				} catch (LoadException e) {
@@ -344,7 +367,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		elem.getStyle().setProperty("position", "absolute");
 		model.addDataObserver(this);
 		model.addStreamObserver(this);
-		searchView = new SearchVideoView();
+		searchView = new SearchVideoView(model,this);
 
 	}
 
@@ -398,172 +421,21 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		remove(searchView);
 	}
 
-	private AbstractMediaPlayer createPlayerWidget(String urlString,
-			String width, String height) {
-		ChromelessPlayer videoWidget = null;
-		try {
-			PlayerParameters parameters = new PlayerParameters();
-			parameters.setLoadRelatedVideos(false);
-			parameters.setFullScreenEnabled(false);
-			parameters.setAutoplay(false);
-			videoWidget = new ChromelessPlayer(urlString.toString(),
-					parameters, width, height);
-			videoWidget.setConfigParameter(ConfigParameter.TransparencyMode,
-					TransparencyMode.TRANSPARENT);
-			videoWidget.showLogger(false);
-		} catch (PluginNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PluginVersionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return videoWidget;
-	}
+	
 
-	public class SearchVideoView extends FlowPanel implements VideoSearchStreamObserver {
+	
 
-		private StackPanel resultsPanel;
-		private final TextBox searchTextBox;
-		private Note currentnote;
+	@Override
+	public void onStreamReceived(VideoSearchResults results) {
+		// TODO Auto-generated method stub
 		
-
-		public SearchVideoView() {
-			
-			final Images images = GWT.create(Images.class);
-			setStyleName("search-panel");
-			final Element elem = getElement();
-			elem.getStyle().setProperty("position", "absolute");
-			elem.getStyle().setPropertyPx("left", 100);
-			elem.getStyle().setPropertyPx("top", 200);
-			DivElement titleElement = elem.appendChild(Document.get().createDivElement());
-			titleElement.setClassName("search-view-title");
-			titleElement.setInnerText("Search YouTube Videos");
-			searchTextBox = new TextBox();
-			searchTextBox.setStyleName("search-box");
-			searchTextBox.setName("YouTube ID:");
-			searchTextBox.addKeyPressHandler(new KeyPressHandler() {
-				public void onKeyPress(KeyPressEvent event) {
-					switch (event.getCharCode()) {
-					case KeyCodes.KEY_ENTER:
-						model.getYouTubeSearchResults(searchTextBox.getText());
-						break;
-					case KeyCodes.KEY_ESCAPE:
-						break;
-					}
-				}
-			});
-			HorizontalPanel searchBoxPanel = new HorizontalPanel();
-			searchBoxPanel.add(searchTextBox);
-			searchBoxPanel.add(Buttons.createPushButtonWithImageStates(images.searchViewSearchButton().createImage(), "search-button", new ClickHandler(){
-
-				@Override
-				public void onClick(ClickEvent event) {
-					model.getYouTubeSearchResults(searchTextBox.getText());
-					
-				}
-				
-			}));
-			add(searchBoxPanel);
-			resultsPanel = new StackPanel();
-			add(resultsPanel);
-			getElement().getStyle().setProperty("zIndex", "" + nextZIndex());
-			model.addStreamObserver(this);
-		}
-
-		@Override
-		public void onStreamReceived(VideoSearchResults results) {
-			removeSearchResults();
-			ArrayList<VideoSearchResult> videos = results.getResults();
-			for (int i = 0; i < videos.size(); i++) {
-				
-				StringBuffer urlString = new StringBuffer(
-						"http://www.youtube.com/v/");
-				
-				final VideoSearchResult videoSearchResult = videos.get(i);
-				urlString.append(videoSearchResult.getYouTubeID());
-				
-				
-				AbstractMediaPlayer playerWidget = createPlayerWidget(
-						urlString.toString(), "170", "170");
-				System.out.println(urlString.toString());
-				
-				
-				FlowPanel singleResultPane = new FlowPanel();
-				
-				
-				
-				HorizontalPanel videoYDescriptionPane = new HorizontalPanel();
-				VerticalPanel contentYButton = new VerticalPanel();
-				TextArea content = new TextArea();
-				content.setStyleName("content-area");
-				content.setText(videoSearchResult.getDescription());
-				contentYButton.add(content);
-				Button addButton = new Button("add", new ClickHandler() {
-					
-					@Override
-					public void onClick(ClickEvent event) {						
-						model.updateNoteVideo(currentnote, new Video(videoSearchResult.getYouTubeID(),0,0));
-						
-						removeSearchView();
-					}
-				});
-				contentYButton.add(addButton);
-				
-				videoYDescriptionPane.add(playerWidget);
-				videoYDescriptionPane.setCellWidth(playerWidget, "170");
-				videoYDescriptionPane.add(contentYButton);
-				videoYDescriptionPane.setCellWidth(content, "210");
-				videoYDescriptionPane.setCellHorizontalAlignment(content, HorizontalPanel.ALIGN_RIGHT);
-				singleResultPane.add(videoYDescriptionPane);
-				CustomPlayerControl cpc = new CustomPlayerControl(playerWidget);
-				singleResultPane.add(cpc);
-				resultsPanel.add(singleResultPane, videoSearchResult.getTitle());
-
-			}
-
-		}
-
-		@Override
-		public void onStartSearch() {			
-			removeSearchResults();
-			
-		}
-
-		private void removeSearchResults() {
-			//for (int searchResult = 0; searchResult < resultsPanel.getWidgetCount(); searchResult++) {
-			//	resultsPanel.remove(searchResult);
-			//}
-			resultsPanel.clear();
-		}
-
-		/**
-		 * @param currentnote the currentnote to set
-		 */
-		public void setCurrentnote(Note currentnote) {
-			this.currentnote = currentnote;
-		}
-
-		/**
-		 * @return the currentnote
-		 */
-		public Note getCurrentnote() {
-			return currentnote;
-		}
-
 	}
 
 	@Override
 	public void onStartSearch() {
 		if (!searchView.isAttached()){
-		add(searchView);
-		}
-		
-	}
-
-	@Override
-	public void onStreamReceived(VideoSearchResults results) {
-		// TODO Auto-generated method stub
+			add(searchView);
+			}
 		
 	}
 
