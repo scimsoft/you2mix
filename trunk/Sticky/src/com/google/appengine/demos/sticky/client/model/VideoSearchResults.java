@@ -39,7 +39,7 @@ public class VideoSearchResults {
 	public VideoSearchResult(String title, String videoHref,String descritpion) {
 		
 		this.setTitle(title);
-		this.videoLink = videoHref;
+		this.setVideoLink(videoHref);
 		this.setYouTubeID(videoHref.subSequence(32, 43).toString());
 		this.description = descritpion;
 		System.out.println("youTubeID: " + youTubeID);
@@ -85,6 +85,20 @@ public class VideoSearchResults {
 	 */
 	public String getDescription() {
 		return description;
+	}
+
+	/**
+	 * @param videoLink the videoLink to set
+	 */
+	public void setVideoLink(String videoLink) {
+		this.videoLink = videoLink;
+	}
+
+	/**
+	 * @return the videoLink
+	 */
+	public String getVideoLink() {
+		return videoLink;
 	}
 	}
 
