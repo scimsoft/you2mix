@@ -86,6 +86,10 @@ public class Cache {
   public void deleteNotes(String surfaceKey) {
     memcache.delete(NOTES_PREFIX + surfaceKey);
   }
+  
+  public void deleteVideos(String videoKey){
+	  memcache.delete(VIDEO_PREFIX + videoKey);
+  }
 
   /**
    * Deletes a {@link Surface} from the cache. This is used to invalidate cache

@@ -9,7 +9,7 @@ import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Video;
 import com.google.appengine.demos.sticky.client.model.VideoSearchResults;
-import com.google.appengine.demos.sticky.client.model.Model.VideoSearchStreamObserver;
+import com.google.appengine.demos.sticky.client.model.Model.VideoSearchObserver;
 import com.google.appengine.demos.sticky.client.model.VideoSearchResults.VideoSearchResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SearchVideoView extends FlowPanel implements
-		VideoSearchStreamObserver,MouseUpHandler, MouseDownHandler, MouseMoveHandler {
+		VideoSearchObserver,MouseUpHandler, MouseDownHandler, MouseMoveHandler {
 
 	private StackPanel resultsPanel;
 	private final TextBox searchTextBox;
@@ -133,44 +133,7 @@ public class SearchVideoView extends FlowPanel implements
 		return searchButton;
 	}
 	
-	public void onMouseDown(MouseDownEvent event) {
-		
-
-		final EventTarget target = event.getNativeEvent().getEventTarget();
-		assert Element.is(target);
-		if (!Element.is(target)) {
-			return;
-		}
-
-		if (titleElement.isOrHasChild(Element.as(target))) {
-			dragging = true;
-			final Element elem = getElement().cast();
-			dragOffsetX = event.getX();
-			dragOffsetY = event.getY();
-			DOM.setCapture(elem);
-			event.preventDefault();
-		}
-
-	}
-
-	public void onMouseMove(MouseMoveEvent event) {
-		if (dragging) {
-			setPixelPosition(
-					event.getX() + getAbsoluteLeft() - dragOffsetX, event
-							.getY()
-							+ getAbsoluteTop() - dragOffsetY);
-			event.preventDefault();
-		}
-	}
-
-	public void onMouseUp(MouseUpEvent event) {
-		if (dragging) {
-			dragging = false;
-			DOM.releaseCapture(getElement());
-			event.preventDefault();
-			
-		}
-	}
+	
 	
 	public void setPixelPosition(int x, int y) {
 		final Style style = getElement().getStyle();
@@ -257,6 +220,45 @@ public class SearchVideoView extends FlowPanel implements
 	public void onStartSearch() {
 		removeSearchResults();
 
+	}
+	
+public void onMouseDown(MouseDownEvent event) {
+		
+
+		final EventTarget target = event.getNativeEvent().getEventTarget();
+		assert Element.is(target);
+		if (!Element.is(target)) {
+			return;
+		}
+
+		if (titleElement.isOrHasChild(Element.as(target))) {
+			dragging = true;
+			final Element elem = getElement().cast();
+			dragOffsetX = event.getX();
+			dragOffsetY = event.getY();
+			DOM.setCapture(elem);
+			event.preventDefault();
+		}
+
+	}
+
+	public void onMouseMove(MouseMoveEvent event) {
+		if (dragging) {
+			setPixelPosition(
+					event.getX() + getAbsoluteLeft() - dragOffsetX, event
+							.getY()
+							+ getAbsoluteTop() - dragOffsetY);
+			event.preventDefault();
+		}
+	}
+
+	public void onMouseUp(MouseUpEvent event) {
+		if (dragging) {
+			dragging = false;
+			DOM.releaseCapture(getElement());
+			event.preventDefault();
+			
+		}
 	}
 
 }

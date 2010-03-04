@@ -35,9 +35,75 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * @author knorton@google.com (Kelly Norton)
  */
 public class Model {
+	/**
+	 * The period to use, in millisconds, for polling for updates to notes on
+	 * the currently selected surface.
+	 */
+	private static final int GET_NOTES_POLLING_INTERVAL = 10000 /* ms. */;
 
-	public interface VideoSearchStreamObserver {
+	/**
+	 * The period to use, in milliseconds, for polling for updates to the list
+	 * of surfaces that the author is participating in.
+	 */
+	private static final int GET_SURFACES_POLLING_INTERVAL = 20000 /* ms. */;
+
+	/**
+	 * An rpc proxy for making calls to the server.
+	 */
+	private final ServiceAsync api;
+
+	/**
+	 * The currently selected surface. This should never be null.
+	 */
+	private Surface selectedSurface;
+
+	/**
+	 * The currently logged in author.
+	 */
+	private final Author author;
+
+	/**
+	 * The list of the observers monitoring the model for data related events.
+	 */
+	private final List<DataObserver> dataObservers = new ArrayList<DataObserver>();
+
+	/**
+	 * The observer that is receiving status events.
+	 */
+	private final StatusObserver statusObserver;
+
+	private final List<VideoSearchObserver> videoSearchObservers = new ArrayList<VideoSearchObserver>();
+
+	/**
+	 * A url that can be used to log the current user out.
+	 */
+	private final String logoutUrl;
+
+	/**
+	 * A task queue to manage all writes to the server.
+	 */
+	private final TaskQueue taskQueue = new TaskQueue();
+
+	/**
+	 * Manages the initial loading of notes associated with the selected surface
+	 * and polls repeatedly for changes.
+	 */
+	private final NoteLoader noteLoader = new NoteLoader(this, GET_NOTES_POLLING_INTERVAL);
+
+	/**
+	 * Manages the initial loading of the list of surfaces for an author and
+	 * continues polling repeatedly for updates.
+	 */
+	private final SurfaceLoader surfaceLoader = new SurfaceLoader(this, GET_SURFACES_POLLING_INTERVAL);
+
+	/**
+	 * Indicates whether the RPC end point is currently responding.
+	 */
+	private boolean offline;
+
+	public interface VideoSearchObserver {
 		void onStartSearch();
+
 		void onStreamReceived(VideoSearchResults results);
 	}
 
@@ -95,8 +161,6 @@ public class Model {
 
 	}
 
-	
-
 	/**
 	 * An observer interface used to get callbacks during the initial load of
 	 * the {@link Model}.
@@ -149,7 +213,6 @@ public class Model {
 		void onTaskStarted(String description);
 	}
 
-	
 	/**
 	 * A simple callback for reporting success to the caller asynchronously.
 	 * This is used for call sites where the caller needs to know the result of
@@ -162,32 +225,28 @@ public class Model {
 	/**
 	 * A task that manages the call to the server to add an author to a surface.
 	 */
-	private class AddAuthorToSurfaceTask extends Task implements
-			AsyncCallback<Service.AddAuthorToSurfaceResult> {
+	private class AddAuthorToSurfaceTask extends Task implements AsyncCallback<Service.AddAuthorToSurfaceResult> {
 		private final Surface surface;
 
 		private final String email;
 
 		private final SuccessCallback callback;
 
-		public AddAuthorToSurfaceTask(Surface surface, String email,
-				SuccessCallback callback) {
+		public AddAuthorToSurfaceTask(Surface surface, String email, SuccessCallback callback) {
 			this.surface = surface;
 			this.email = email;
 			this.callback = callback;
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(Service.AddAuthorToSurfaceResult result) {
 			final boolean success = result != null;
 			callback.onResponse(success);
 			if (success) {
-				surface.update(Model.this, result.getAuthorName(), result
-						.getUpdatedAt());
+				surface.update(Model.this, result.getAuthorName(), result.getUpdatedAt());
 			}
 			getQueue().taskSucceeded(this);
 		}
@@ -201,8 +260,7 @@ public class Model {
 	/**
 	 * A task that manages the call to the server to create a new note.
 	 */
-	private class CreateNoteTask extends Task implements
-			AsyncCallback<CreateObjectResult> {
+	private class CreateNoteTask extends Task implements AsyncCallback<CreateObjectResult> {
 		private final Note note;
 
 		private final Surface surface;
@@ -214,13 +272,11 @@ public class Model {
 
 		@Override
 		public void execute() {
-			api.createNote(surface.getKey(), note.getX(), note.getY(), note
-					.getWidth(), note.getHeight(), note.getVideo(), this);
+			api.createNote(surface.getKey(), note.getX(), note.getY(), note.getWidth(), note.getHeight(), note.getVideo(), this);
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(CreateObjectResult result) {
@@ -235,8 +291,7 @@ public class Model {
 	/**
 	 * A task to manages the call to the server to create a new surface.
 	 */
-	private class CreateSurfaceTask extends Task implements
-			AsyncCallback<Service.CreateObjectResult> {
+	private class CreateSurfaceTask extends Task implements AsyncCallback<Service.CreateObjectResult> {
 		private final Surface surface;
 
 		public CreateSurfaceTask(Surface surface) {
@@ -248,8 +303,7 @@ public class Model {
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(Service.CreateObjectResult result) {
@@ -370,8 +424,7 @@ public class Model {
 	 * A {@link Task} that manages the call to the server to update the contents
 	 * of a {@link Note}.
 	 */
-	private class UpdateNoteContentTask extends Task implements
-			AsyncCallback<Date> {
+	private class UpdateNoteContentTask extends Task implements AsyncCallback<Date> {
 		private final String content;
 
 		private final Note note;
@@ -388,8 +441,7 @@ public class Model {
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(Date lastUpdatedAt) {
@@ -398,8 +450,7 @@ public class Model {
 		}
 	}
 
-	private class UpdateNoteVideoTask extends Task implements
-			AsyncCallback<Date> {
+	private class UpdateNoteVideoTask extends Task implements AsyncCallback<Date> {
 		private final Video video;
 
 		private final Note note;
@@ -416,16 +467,41 @@ public class Model {
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(Date lastUpdatedAt) {
 			note.update(lastUpdatedAt);
-			getQueue().taskSucceeded(this);
 			note.getObserver().onUpdate(note);
-			
-			
+			getQueue().taskSucceeded(this);
+
+		}
+	}
+
+	private class UpdateVideoTask extends Task implements AsyncCallback<Date> {
+
+		private Video video;
+
+		public UpdateVideoTask(Video video) {
+			this.video = video;
+		}
+
+		@Override
+		void execute() {
+			api.changeVideo(video.getKey(), video, this);
+
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onSuccess(Date result) {
+			// TODO Auto-generated method stub
+
 		}
 	}
 
@@ -438,8 +514,7 @@ public class Model {
 	 * A {@link Task} that manages the call to the server to update the position
 	 * of a {@link Note}.
 	 */
-	private class UpdateNotePositionTask extends Task implements
-			AsyncCallback<Date> {
+	private class UpdateNotePositionTask extends Task implements AsyncCallback<Date> {
 		private final Note note;
 
 		private final int x, y, width, height;
@@ -461,8 +536,7 @@ public class Model {
 		}
 
 		public void onFailure(Throwable caught) {
-			getQueue().taskFailed(this,
-					caught instanceof Service.AccessDeniedException);
+			getQueue().taskFailed(this, caught instanceof Service.AccessDeniedException);
 		}
 
 		public void onSuccess(Date result) {
@@ -471,17 +545,19 @@ public class Model {
 		}
 	}
 
-	/**
-	 * The period to use, in millisconds, for polling for updates to notes on
-	 * the currently selected surface.
-	 */
-	private static final int GET_NOTES_POLLING_INTERVAL = 10000 /* ms. */;
+	
 
-	/**
-	 * The period to use, in milliseconds, for polling for updates to the list
-	 * of surfaces that the author is participating in.
-	 */
-	private static final int GET_SURFACES_POLLING_INTERVAL = 20000 /* ms. */;
+	private Model(Author author, Surface selectedSurface, String logoutUrl, ServiceAsync api, StatusObserver statusObserver) {
+		this.author = author;
+		this.api = api;
+		this.logoutUrl = logoutUrl;
+		this.statusObserver = statusObserver;
+
+		selectedSurface.initialize(this);
+		selectSurface(selectedSurface);
+
+		surfaceLoader.start();
+	}
 
 	/**
 	 * Provides an asynchronous factory for loading a {@link Model}.
@@ -491,19 +567,16 @@ public class Model {
 	 * @param statusObserver
 	 *            a callback to receive status events
 	 */
-	public static void load(final LoadObserver loadObserver,
-			final StatusObserver statusObserver) {
+	public static void load(final LoadObserver loadObserver, final StatusObserver statusObserver) {
 		final ServiceAsync api = GWT.create(Service.class);
 		api.getUserInfo(new AsyncCallback<Service.UserInfoResult>() {
 			public void onFailure(Throwable caught) {
 				loadObserver.onModelLoadFailed();
-				System.out.println("ok" + caught.getLocalizedMessage());
+				
 			}
 
 			public void onSuccess(UserInfoResult result) {
-				loadObserver.onModelLoaded(new Model(result.getAuthor(), result
-						.getSurface(), result.getLogoutUrl(), api,
-						statusObserver));
+				loadObserver.onModelLoaded(new Model(result.getAuthor(), result.getSurface(), result.getLogoutUrl(), api, statusObserver));
 			}
 		});
 	}
@@ -511,77 +584,6 @@ public class Model {
 	native static void forceApplicationReload() /*-{
 		$wnd.location.reload();
 	}-*/;
-
-	/**
-	 * An rpc proxy for making calls to the server.
-	 */
-	private final ServiceAsync api;
-
-	/**
-	 * The currently selected surface. This should never be null.
-	 */
-	private Surface selectedSurface;
-
-	/**
-	 * The currently logged in author.
-	 */
-	private final Author author;
-
-	/**
-	 * The list of the observers monitoring the model for data related events.
-	 */
-	private final List<DataObserver> dataObservers = new ArrayList<DataObserver>();
-
-	/**
-	 * The observer that is receiving status events.
-	 */
-	private final StatusObserver statusObserver;
-	
-	private final List<VideoSearchStreamObserver> streamObservers = new ArrayList<VideoSearchStreamObserver>();
-
-	
-	/**
-	 * A url that can be used to log the current user out.
-	 */
-	private final String logoutUrl;
-
-	/**
-	 * A task queue to manage all writes to the server.
-	 */
-	private final TaskQueue taskQueue = new TaskQueue();
-
-	/**
-	 * Manages the initial loading of notes associated with the selected surface
-	 * and polls repeatedly for changes.
-	 */
-	private final NoteLoader noteLoader = new NoteLoader(this,
-			GET_NOTES_POLLING_INTERVAL);
-
-	/**
-	 * Manages the initial loading of the list of surfaces for an author and
-	 * continues polling repeatedly for updates.
-	 */
-	private final SurfaceLoader surfaceLoader = new SurfaceLoader(this,
-			GET_SURFACES_POLLING_INTERVAL);
-
-	
-	/**
-	 * Indicates whether the RPC end point is currently responding.
-	 */
-	private boolean offline;
-
-	private Model(Author author, Surface selectedSurface, String logoutUrl,
-			ServiceAsync api, StatusObserver statusObserver) {
-		this.author = author;
-		this.api = api;
-		this.logoutUrl = logoutUrl;
-		this.statusObserver = statusObserver;
-		
-		selectedSurface.initialize(this);
-		selectSurface(selectedSurface);
-
-		surfaceLoader.start();
-	}
 
 	/**
 	 * Add an {@link Author} as a member of a particular {@link Surface} and
@@ -594,8 +596,7 @@ public class Model {
 	 * @param callback
 	 *            a callback to report success/failure to the caller
 	 */
-	public void addAuthorToSurface(Surface surface, String email,
-			SuccessCallback callback) {
+	public void addAuthorToSurface(Surface surface, String email, SuccessCallback callback) {
 		taskQueue.post(new AddAuthorToSurfaceTask(surface, email, callback));
 	}
 
@@ -608,15 +609,11 @@ public class Model {
 	public void addDataObserver(DataObserver observer) {
 		dataObservers.add(observer);
 	}
-	
-	public void addStreamObserver(VideoSearchStreamObserver searchObserver) {
-		streamObservers.add(searchObserver);
-		
+
+	public void addStreamObserver(VideoSearchObserver searchObserver) {
+		videoSearchObservers.add(searchObserver);
+
 	}
-	
-	
-	
-	
 
 	/**
 	 * Creates a note with no content at a particular location on the
@@ -646,52 +643,40 @@ public class Model {
 		selectSurface(surface);
 	}
 
-	public void getYouTubeSearchResults(String searchString){
+	public void getYouTubeSearchResults(String searchString) {
 		final VideoSearchResults finalResult = new VideoSearchResults();
 		StringBuffer jsonURL = new StringBuffer("http://gdata.youtube.com/feeds/api/videos?q=");
 		jsonURL.append(searchString);
 		jsonURL.append("&max-results=5&alt=json-in-script&callback=");
-		//jsonURL.append(searchString);
-		//jsonURL.append("&callback=");
-		/*
-		 * http://gdata.youtube.com/feeds/api/videos?
-         q=skateboarding+dog
-     	&start-index=21
-     	&max-results=10
-     	&v=2
-		 */
-		System.out.println(jsonURL.toString());
-		JSONRequest.get(jsonURL.toString(), 
-				  new JSONRequestHandler() {
-					  
-					@Override
-					public void onRequestComplete(JavaScriptObject json) {
-						System.out.println("ok2");
-						JSONObject jso = new JSONObject(json);
-					    JSONArray ary = jso.get("feed").isObject().get("entry").isArray();
-					    //JSONValue value = JSONParser.parse(json.toSource());
-					    for (int i = 0; i < ary.size(); ++i) {
-					      String title = ary.get(i).isObject().get("title").isObject().get("$t").toString();
-					      System.out.println("Title: " + title);
-					      
-					      String contentText = ary.get(i).isObject().get("content").isObject().get("$t").toString();
-					      System.out.println("Content: " + contentText);
-					      
-					      JSONArray jsonValue = ary.get(i).isObject().get("link").isArray();
-					      String hrefLink = jsonValue.get(0).isObject().get("href").toString();
-					      System.out.println("ID: " + hrefLink);					      
-					      finalResult.addSearchResult(title, hrefLink, contentText);
-					      
-					    }
-					    notifyStreamObserver(finalResult);
-					    
-						
-					} 
-					  
-				  });
-		
-		
+		JSONRequest.get(jsonURL.toString(), new JSONRequestHandler() {
+
+			@Override
+			public void onRequestComplete(JavaScriptObject json) {
+				System.out.println("ok2");
+				JSONObject jso = new JSONObject(json);
+				JSONArray ary = jso.get("feed").isObject().get("entry").isArray();
+				// JSONValue value = JSONParser.parse(json.toSource());
+				for (int i = 0; i < ary.size(); ++i) {
+					String title = ary.get(i).isObject().get("title").isObject().get("$t").toString();
+					System.out.println("Title: " + title);
+
+					String contentText = ary.get(i).isObject().get("content").isObject().get("$t").toString();
+					System.out.println("Content: " + contentText);
+
+					JSONArray jsonValue = ary.get(i).isObject().get("link").isArray();
+					String hrefLink = jsonValue.get(0).isObject().get("href").toString();
+					System.out.println("ID: " + hrefLink);
+					finalResult.addSearchResult(title, hrefLink, contentText);
+
+				}
+				notifyStreamObserver(finalResult);
+
+			}
+
+		});
+
 	}
+
 	/**
 	 * Gets the currently logged in author.
 	 * 
@@ -753,10 +738,12 @@ public class Model {
 
 	public void updateNoteVideo(final Note note, Video video) {
 		taskQueue.post(new UpdateNoteVideoTask(note, video));
-		
+
 	}
 
-	
+	public void updateVideo(Video video) {
+		taskQueue.post(new UpdateVideoTask(video));
+	}
 
 	/**
 	 * Updates the position of a {@link Note} and persists the change to the
@@ -768,8 +755,7 @@ public class Model {
 	 * @param width
 	 * @param height
 	 */
-	public void updateNotePosition(final Note note, int x, int y, int width,
-			int height) {
+	public void updateNotePosition(final Note note, int x, int y, int width, int height) {
 		taskQueue.post(new UpdateNotePositionTask(note, x, y, width, height));
 	}
 
@@ -799,8 +785,6 @@ public class Model {
 		}
 	}
 
-	
-
 	void notifySurfaceNotesReceived(Note[] notes) {
 		for (int i = 0, n = dataObservers.size(); i < n; ++i) {
 			dataObservers.get(i).onSurfaceNotesReceived(notes);
@@ -813,14 +797,12 @@ public class Model {
 		}
 	}
 
-		
-	void notifyStreamObserver(VideoSearchResults results){
-		for (int i = 0, n = streamObservers.size(); i < n; ++i) {
-			streamObservers.get(i).onStreamReceived(results);
-		}		
+	void notifyStreamObserver(VideoSearchResults results) {
+		for (int i = 0, n = videoSearchObservers.size(); i < n; ++i) {
+			videoSearchObservers.get(i).onStreamReceived(results);
+		}
 	}
 
-	
 	/**
 	 * Invoked by tasks and loaders when RPC invocations begin to fail.
 	 */
@@ -851,14 +833,10 @@ public class Model {
 	}
 
 	private void notifySearchStart() {
-		for (int i = 0, n = streamObservers.size(); i < n; ++i) {
-			streamObservers.get(i).onStartSearch();
+		for (int i = 0, n = videoSearchObservers.size(); i < n; ++i) {
+			videoSearchObservers.get(i).onStartSearch();
 		}
-		
+
 	}
-
-	
-
-	
 
 }

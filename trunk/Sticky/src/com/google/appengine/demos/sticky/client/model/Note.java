@@ -28,7 +28,7 @@ import com.google.gwt.core.client.GWT;
 @SuppressWarnings("serial")
 public class Note implements Serializable {
 
-  public interface Observer {
+  public interface NoteObserver {
     void onUpdate(Note note);
   }
 
@@ -78,7 +78,7 @@ public class Note implements Serializable {
   /**
    * An observer to receive callbacks whenever this {@link Note} is updated.
    */
-  private transient Observer observer;
+  private transient NoteObserver observer;
 
   /**
    * Indicates whether a sticky is editable by the current author.
@@ -168,7 +168,7 @@ public String getAuthorName() {
    * 
    * @return
    */
-  public Observer getObserver() {
+  public NoteObserver getObserver() {
     return observer;
   }
 
@@ -212,7 +212,7 @@ public String getAuthorName() {
    * 
    * @param observer
    */
-  public void setObserver(Observer observer) {
+  public void setObserver(NoteObserver observer) {
     this.observer = observer;
   }
 

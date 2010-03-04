@@ -5,14 +5,6 @@ import java.util.Date;
 
 import javax.jdo.annotations.PersistenceCapable;
 
-import com.bramosystems.oss.player.core.client.ConfigParameter;
-import com.bramosystems.oss.player.core.client.PluginNotFoundException;
-import com.bramosystems.oss.player.core.client.PluginVersionException;
-import com.bramosystems.oss.player.core.client.TransparencyMode;
-import com.bramosystems.oss.player.youtube.client.ChromelessPlayer;
-import com.bramosystems.oss.player.youtube.client.PlayerParameters;
-import com.bramosystems.oss.player.youtube.client.YouTubePlayer;
-
 @SuppressWarnings("serial")
 @PersistenceCapable
 public class Video  implements Serializable {
@@ -63,32 +55,7 @@ public class Video  implements Serializable {
 	}
 	
 	
-	public YouTubePlayer getVideoWidget() {
-
-		StringBuffer videoUrl = new StringBuffer("http://www.youtube.com/v/");
-		
-		videoUrl.append(youTubeID);		
-		YouTubePlayer swfWidget = null; 
-		try {
-			PlayerParameters p = new PlayerParameters();
-		    p.setLoadRelatedVideos(false);
-		    p.setFullScreenEnabled(false);
-		    p.setAutoplay(false);
-		    
-			swfWidget = new ChromelessPlayer(videoUrl.toString(),p, "170", "170");
-			swfWidget.setConfigParameter(ConfigParameter.TransparencyMode, TransparencyMode.TRANSPARENT);
-			
-			swfWidget.showLogger(false);
-			
-		} catch (PluginNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PluginVersionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return swfWidget;
-	}
+	
 
 	/**
 	 * @param key the key to set

@@ -618,15 +618,15 @@ public static class Video implements Serializable{
 	  private String youTubeId;
 	  
 	  @Persistent
-	  private static int startTime;
+	  private int startTime;
 	  
 	  @Persistent
-	  private static int endTime;
+	  private int endTime;
 
 	public Video(String youTubeID, int startTime, int endTime) {
 		this.youTubeId=youTubeID;
-		setStartTime(startTime);
-		setEndTime(endTime);
+		this.startTime= startTime;
+		this.endTime=endTime;
 	}
 
 	public void setYouTubeId(String youTubeId) {
@@ -638,7 +638,7 @@ public static class Video implements Serializable{
 	}
 
 	public void setStartTime(int startTime) {
-		Video.startTime = startTime;
+		this.startTime = startTime;
 	}
 
 	public int getStartTime() {
@@ -649,7 +649,7 @@ public static class Video implements Serializable{
 	 * @param endTime the endTime to set
 	 */
 	public void setEndTime(int endTime) {
-		Video.endTime = endTime;
+		this.endTime = endTime;
 	}
 
 	/**

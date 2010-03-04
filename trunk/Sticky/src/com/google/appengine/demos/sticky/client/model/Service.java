@@ -375,6 +375,8 @@ static class GetVideoResult implements Serializable{
       throws AccessDeniedException;
 
   Date changeNoteVideo(String key, Video video)throws AccessDeniedException;
+  
+  Date changeVideo(String key, Video video)throws AccessDeniedException;
   /**
    * Updates the position for a {@link Note}.
    * 

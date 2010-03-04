@@ -15,25 +15,15 @@
 
 package com.google.appengine.demos.sticky.client;
 
-import com.bramosystems.oss.player.core.client.AbstractMediaPlayer;
 import com.bramosystems.oss.player.core.client.LoadException;
-import com.bramosystems.oss.player.core.client.skin.CSSSeekBar;
-import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
 import com.google.appengine.demos.sticky.client.model.Model;
 import com.google.appengine.demos.sticky.client.model.Note;
 import com.google.appengine.demos.sticky.client.model.Surface;
-import com.google.appengine.demos.sticky.client.model.Video;
 import com.google.appengine.demos.sticky.client.model.VideoSearchResults;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -45,14 +35,10 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageBundle;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.WidgetCollection;
 
 /**
@@ -62,7 +48,7 @@ import com.google.gwt.user.client.ui.WidgetCollection;
  * @author knorton@google.com (Kelly Norton)
  */
 @SuppressWarnings("deprecation")
-public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.VideoSearchStreamObserver {
+public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.VideoSearchObserver {
 
 	public interface Images extends ImageBundle {
 		@Resource("surface-list-add-hv.gif")
@@ -78,7 +64,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 	/**
 	 * A widget for displaying a single {@link Note}.
 	 */
-	public class NoteView extends SimplePanel implements Note.Observer,
+	public class NoteView extends SimplePanel implements Note.NoteObserver,
 			MouseUpHandler, MouseDownHandler, MouseMoveHandler,
 			ValueChangeHandler<String> {
 		private final Note note;
@@ -111,7 +97,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			content.addValueChangeHandler(this);
 
 			render();
-			videoView = new VideoView(note);
+			videoView = new VideoView(model,note);
 			setWidget(videoView);
 			
 			
@@ -119,11 +105,12 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			addDomHandler(this, MouseDownEvent.getType());
 			addDomHandler(this, MouseMoveEvent.getType());
 			addDomHandler(this, MouseUpEvent.getType());
-
+			
 		}
 
 		public void onMouseDown(MouseDownEvent event) {
 			SurfaceView.this.select(this);
+			searchView.setCurrentnote(note);
 			if (!note.isOwnedByCurrentUser()) {
 				return;
 			}
@@ -167,7 +154,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 
 		public void onUpdate(Note note) {
 			videoView.youTubeIdBox.setText(note.getVideo().getYouTubeID());
-			try {
+			videoView.video.setYouTubeID(note.getVideo().getYouTubeID());
+			try {				
 				videoView.loadNewVideo();
 			} catch (LoadException e) {
 				// TODO Auto-generated catch block
@@ -200,6 +188,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			content.setText((noteContent == null) ? "" : noteContent);
 
 			content.setReadOnly(!note.isOwnedByCurrentUser());
+			
+		
 		
 		}
 
@@ -213,138 +203,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		 * @param videoObject
 		 *            the videoObject to set
 		 */
-		public class VideoView extends SimplePanel implements Video.VideoObserver{
-			
-			protected final TextBox youTubeIdBox;
-			final AbstractMediaPlayer noteVideo;
-			private final Note note;
-			private TextBox startTime;
-			private TextBox endTime;
-			
-			public VideoView(final Note note)  {
-				this.note = note;
-				final Video video = note.getVideo();
-				video.setObserver(this);
-				String youTubeIDString = video.getYouTubeID();
-				StringBuffer urlString = new StringBuffer(
-						"http://www.youtube.com/v/");
-				urlString.append(youTubeIDString);
-
-				noteVideo = You2MixMediaPlayer.createPlayerWidget(
-						urlString.toString(), "170", "170");
-
-				youTubeIdBox = new TextBox();
-				youTubeIdBox.setStyleName("note-YouTubeID");
-				youTubeIdBox.setName("YouTube ID:");
-				youTubeIdBox.addKeyPressHandler(new KeyPressHandler() {
-					public void onKeyPress(KeyPressEvent event) {
-						switch (event.getCharCode()) {
-						case KeyCodes.KEY_ENTER:
-							try {
-								video.setYouTubeID(youTubeIdBox.getText());
-								loadNewVideo();
-							} catch (LoadException e) {
-								e.printStackTrace();
-							}
-							model.updateNoteVideo(note, video);
-							break;
-						case KeyCodes.KEY_ESCAPE:
-							break;
-						}
-
-					}
-				});
-				final Images images = GWT.create(Images.class);
-
-				ComplexPanel youTubeIDPanel = new HorizontalPanel();
-				youTubeIDPanel.add(youTubeIdBox);
-				youTubeIDPanel.add(Buttons.createPushButtonWithImageStates(
-						images.surfaceListAddSurfaceButtonUp().createImage(),
-						images.surfaceListAddSurfaceButtonHv().createImage(),
-						"surface-list-add", new ClickHandler() {
-							public void onClick(ClickEvent event) {
-								searchView.setCurrentnote(note);
-								model.onStartSearch();
-								
-							}
-						}));
-
-				setYouTubeIdBoxValue(youTubeIDString);
-				CSSSeekBar css = new CSSSeekBar(10);
-				CustomPlayerControl cpc = new CustomPlayerControl(noteVideo);
-				FlowPanel fp = new FlowPanel();
-				fp.add(youTubeIDPanel);
-				fp.add(noteVideo);
-				fp.add(cpc);
-				fp.add(css);
-				HorizontalPanel timerPanel = getTimingPanel();
-				fp.add(timerPanel);
-				add(fp);
-				
-			}
-
-			private HorizontalPanel getTimingPanel() {
-				HorizontalPanel timerPanel = new HorizontalPanel();
-				timerPanel.setStyleName("video-timer-panel");
-				
-				Label startTimeLabel = new Label("Start:");
-				startTimeLabel.setStyleName("video-timer-label");
-				startTime = new TextBox();
-				startTime.setValue("0");
-				startTime.setStyleName("video-start-box");
-				
-				Label endTimeLabel = new Label("End:");
-				endTimeLabel.setStyleName("video-timer-label");
-				endTime = new TextBox();
-				endTime.setValue("0");
-				endTime.setStyleName("video-start-box");
-				
-				timerPanel.add(startTimeLabel);
-				timerPanel.add(startTime);
-				timerPanel.add(endTimeLabel);
-				timerPanel.add(endTime);
-				return timerPanel;
-			}
-
-			private void setYouTubeIdBoxValue(String youTubeIDString) {
-				youTubeIdBox.setValue(youTubeIDString);
-			}
-
-			
-			
-
-			protected void loadNewVideo()
-					throws LoadException {
-				StringBuffer videoUrl = new StringBuffer(
-						"http://www.youtube.com/v/");
-				String youTubeTextBoxValue = note.getVideo().getYouTubeID();
-				videoUrl.append(youTubeTextBoxValue);
-				setYouTubeIdBoxValue(youTubeTextBoxValue);
-				noteVideo.loadMedia(videoUrl.toString());
-
-			}
-
-			@Override
-			public void onVideoUpdate(Video video) {
-				note.setVideo(video);
-				youTubeIdBox.setText(video.getYouTubeID());
-				startTime.setValue(Integer.toString(video.getStartTime()));
-				endTime.setValue(Integer.toString(video.getEndTime()));
-				try {
-					loadNewVideo();
-				} catch (LoadException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-
-			
-
-			
-
-			
-		}
+		
 
 	}
 
@@ -384,6 +243,8 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		removeAllNotes();
 		for (int i = 0, n = notes.length; i < n; ++i) {
 			add(new NoteView(notes[i]));
+			System.out.println("video: id " + notes[i].getVideo().getYouTubeID());
+			System.out.println("video: start " + notes[i].getVideo().getStartTime());
 		}
 	}
 

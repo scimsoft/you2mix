@@ -241,6 +241,31 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
 	      api.close();
 	    }
   }
+  
+  public Date changeVideo(final String noteKey, final Video video)throws AccessDeniedException {
+	  final Store.Api api = store.getApi();
+	 
+	    try {
+	      // Convert the string version of the key into an actual key.
+	      final Key key = KeyFactory.stringToKey(noteKey);
+	       // Start a transaction for the Note we're updating.
+	      final Transaction tx = api.begin();
+	      final Store.Video storeVideo = api.getVideo(key);
+	      storeVideo.setYouTubeId(video.getYouTubeID());
+	      storeVideo.setStartTime(video.getStartTime());
+	      storeVideo.setEndTime(video.getEndTime());
+	      final Store.Video result = api.saveVideo(storeVideo);
+	      tx.commit();
+
+	      // Invalidate the notes cache for the surface that owns this Note.
+	      cache.deleteVideos(KeyFactory.keyToString(storeVideo.getKey()));
+	      
+	      return result.lastUpdatedAt;
+	    } finally {
+	      api.close();
+	    }
+	      
+  }
   public Date changeNotePosition(final String noteKey, final int x,
       final int y, final int width, final int height)
       throws AccessDeniedException {

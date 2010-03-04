@@ -49,6 +49,9 @@ public interface ServiceAsync {
   
   void changeNoteVideo(String key, Video video,
 		  AsyncCallback<Date> callback);
+  
+  void changeVideo(String key, Video video,
+		  AsyncCallback<Date> callback);
 	
   /**
    * @see Service#changeNotePosition(String, int, int, int, int)
