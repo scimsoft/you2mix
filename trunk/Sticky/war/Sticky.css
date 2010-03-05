@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #000;
+  background-color: #fff;
   font-family: Helvetica, Arial, san-serif;
   color: #fff;
   font-size: 12pt;
@@ -111,6 +111,8 @@ body {
   font-size: 80%;
   background-color: #fef49e;
   border: 1px solid #d0c98d;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
   -webkit-box-shadow: -8px 5px 5px rgba(0, 0, 0, 0.3);
 }
 .note-title {
@@ -120,6 +122,9 @@ body {
   -webkit-border-radius: 5px;
   background-color: #d0c98d;
 }
+.note-title:hover{
+	cursor:move;
+	}
 .note-YouTubeID{
   margin: 5px 5px 0 5px;
   padding: 4px;
@@ -163,6 +168,8 @@ body {
   color: #000000;
   background-color: #fef49e;
   border: 4px solid #d0c98d;
+  -moz-border-radius: 5px;
+  	-webkit-border-radius: 5px;
   -webkit-box-shadow: -8px 5px 5px rgba(0, 0, 0, 0.3);
 }
 .gwt-StackPanelItem{
@@ -174,21 +181,26 @@ body {
 	-webkit-box-shadow: -8px 5px 5px rgba(0, 0, 0, 0.3);
 }
 .gwt-StackPanelItem:HOVER{
-	background: #555555;
-	box-shadow: 10px 10px 5px #888; padding: 5px 5px 5px 15px;
+	background: #FEE506;
+	box-shadow: 10px 10px 5px #888; 
+	padding: 5px 5px 5px 15px;
 	}
 	
 .search-view-title{
 	margin: 5px 5px 0 5px;
 	text-align: center;
-	color: #eeeeee;
+	color: #0000000;
 	background-color: #d0c98d;
 	font-size: large;
+	font-weight: bold;
 	border: 1px solid #d0c98d;
 	-moz-border-radius: 5px;
   	-webkit-border-radius: 5px;
 	}
-	.search-box-panel{
+.search-view-title:hover{
+	cursor:move;
+	}
+.search-box-panel{
 	width: 96%;
 	margin: 5px 5px 10px 5px;
 	align: center;
