@@ -21,23 +21,23 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.you2mix.mix.client.SurfaceView.Images;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.VideoCanvas;
-import com.you2mix.mix.client.model.Video;
+import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.You2MixVideo;
 
-public class You2MixVideoView extends SimplePanel implements Video.VideoObserver, PlayStateHandler {
+public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoObserver, PlayStateHandler {
 
 	protected final TextBox youTubeIdBox;
 	final You2MixChromelessPlayer noteVideo;
-	private final VideoCanvas note;
+	private final You2MixVideoData note;
 
-	final Video video;
+	final You2MixVideo video;
 	private boolean isCued;
 	private Model model;
 
 	private TextBox startTime;
 	private TextBox endTime;
 
-	public You2MixVideoView(final Model model, final VideoCanvas note) {
+	public You2MixVideoView(final Model model, final You2MixVideoData note) {
 		this.model = model;
 		this.note = note;
 		this.video = note.getVideo();
@@ -112,7 +112,7 @@ public class You2MixVideoView extends SimplePanel implements Video.VideoObserver
 	}
 
 	@Override
-	public void onVideoUpdate(Video video) {
+	public void onVideoUpdate(You2MixVideo video) {
 		note.setVideo(video);
 		youTubeIdBox.setText(video.getYouTubeID());
 		startTime.setValue(Integer.toString(video.getStartTime()));

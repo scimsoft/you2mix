@@ -2,11 +2,11 @@ package com.you2mix.mix.client.model;
 
 import java.util.ArrayList;
 
-public class VideoSearchResults {
+public class You2MixVideoSearchResults {
 	
 	private ArrayList<VideoSearchResult> results;
 	
-	public VideoSearchResults(){
+	public You2MixVideoSearchResults(){
 		setResults(new ArrayList<VideoSearchResult>());
 	}
 

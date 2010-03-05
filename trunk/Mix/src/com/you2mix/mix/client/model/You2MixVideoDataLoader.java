@@ -25,14 +25,14 @@ import com.you2mix.mix.client.model.Service.AccessDeniedException;
 import com.you2mix.mix.client.model.Service.GetNotesResult;
 
 /**
- * Controls all aspects of loading the set of {@link VideoCanvas}s associated with the
+ * Controls all aspects of loading the set of {@link You2MixVideoData}s associated with the
  * selected {@link Surface}. This class takes care of performing (and possibly
  * retrying) a query for the initial set of Notes and then continues polling the
  * server for updates.
  * 
  * @author knorton@google.com (Kelly Norton)
  */
-class VideoCanvasLoader {
+class You2MixVideoDataLoader {
 
   /**
    * Controls the initial load of notes from the server and will retry on
@@ -64,9 +64,9 @@ class VideoCanvasLoader {
       model.getStatusObserver().onTaskFinished();
 
       timestamp = result.getTimestamp();
-      final VideoCanvas[] notes = result.getNotes();
+      final You2MixVideoData[] notes = result.getNotes();
       for (int i = 0, n = notes.length; i < n; ++i) {
-        final VideoCanvas note = notes[i];
+        final You2MixVideoData note = notes[i];
         note.initialize(model);
         notesCache.put(note.getKey(), note);
       }
@@ -118,10 +118,10 @@ class VideoCanvasLoader {
 
       timestamp = result.getTimestamp();
 
-      final VideoCanvas[] notes = result.getNotes();
+      final You2MixVideoData[] notes = result.getNotes();
       for (int i = 0, n = notes.length; i < n; ++i) {
-        final VideoCanvas note = notes[i];
-        final VideoCanvas existing = notesCache.get(note.getKey());
+        final You2MixVideoData note = notes[i];
+        final You2MixVideoData existing = notesCache.get(note.getKey());
         // If note does not exist, send a noted created notification.
         // Otherwise, update the note and allow it to notify its observer that
         // it changed.
@@ -157,7 +157,7 @@ class VideoCanvasLoader {
 
   private int activeId;
 
-  private Map<String, VideoCanvas> notesCache = new HashMap<String, VideoCanvas>();
+  private Map<String, You2MixVideoData> notesCache = new HashMap<String, You2MixVideoData>();
 
   /**
    * Creates a new loader that is bound to the given model.
@@ -165,7 +165,7 @@ class VideoCanvasLoader {
    * @param model the model to which this loader is bound
    * @param interval the time to wait between polls to the server
    */
-  public VideoCanvasLoader(Model model, int interval) {
+  public You2MixVideoDataLoader(Model model, int interval) {
     this.model = model;
     this.interval = interval;
   }
@@ -179,7 +179,7 @@ class VideoCanvasLoader {
    * @param note
    *          the note
    */
-  public void cacheNote(String key, VideoCanvas note) {
+  public void cacheNote(String key, You2MixVideoData note) {
     assert key != null;
     notesCache.put(key, note);
   }
@@ -205,7 +205,7 @@ class VideoCanvasLoader {
       startInitialLoad();
     } else {
       statusObserver.onTaskFinished();
-      model.notifySurfaceNotesReceived(new VideoCanvas[0]);
+      model.notifySurfaceNotesReceived(new You2MixVideoData[0]);
       startPolling();
     }
   }

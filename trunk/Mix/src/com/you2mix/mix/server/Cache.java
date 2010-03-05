@@ -21,9 +21,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.users.User;
-import com.you2mix.mix.client.model.VideoCanvas;
+import com.you2mix.mix.client.model.You2MixVideoData;
 import com.you2mix.mix.client.model.Surface;
-import com.you2mix.mix.client.model.Video;
+import com.you2mix.mix.client.model.You2MixVideo;
 
 /**
  * A more typesafe wrapper around a {@link MemcacheService}.
@@ -123,11 +123,11 @@ public class Cache {
    * @return a collection of notes if there is a cache entry, <code>null</code>
    *         otherwise
    */
-  public VideoCanvas[] getNotes(User user, String surfaceKey) {
+  public You2MixVideoData[] getNotes(User user, String surfaceKey) {
     if (!canUserAccessNotes(user, surfaceKey)) {
       return null;
     }
-    return (VideoCanvas[]) memcache.get(createNotesId(surfaceKey));
+    return (You2MixVideoData[]) memcache.get(createNotesId(surfaceKey));
   }
 
   /**
@@ -141,8 +141,8 @@ public class Cache {
     return (Surface) memcache.get(createSurfaceId(surfaceKey));
   }
   
-  public Video getVideo( Key videoKey) {
-	  return (Video) memcache.get(createVideoId(videoKey));
+  public You2MixVideo getVideo( Key videoKey) {
+	  return (You2MixVideo) memcache.get(createVideoId(videoKey));
 	}
 
   
@@ -177,7 +177,7 @@ public class Cache {
    *          the collection of notes to cache
    * @return <code>notes</code>, for call chaining
    */
-  public VideoCanvas[] putNotes(User user, String surfaceKey, VideoCanvas[] notes) {
+  public You2MixVideoData[] putNotes(User user, String surfaceKey, You2MixVideoData[] notes) {
     memcache.put(createNotesId(surfaceKey), notes);
     allowUserToAccessNotes(user, surfaceKey);
     return notes;
@@ -197,7 +197,7 @@ public class Cache {
     return surface;
   }
   
-  public Video putVideo(Key videoKey, Video video) {
+  public You2MixVideo putVideo(Key videoKey, You2MixVideo video) {
 	    memcache.put(createVideoId(videoKey), video);
 	    return video;
 	  }

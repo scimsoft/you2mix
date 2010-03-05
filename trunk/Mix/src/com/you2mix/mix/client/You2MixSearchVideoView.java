@@ -31,18 +31,18 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.you2mix.mix.client.SurfaceView.Images;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.VideoCanvas;
-import com.you2mix.mix.client.model.Video;
-import com.you2mix.mix.client.model.VideoSearchResults;
+import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.You2MixVideo;
+import com.you2mix.mix.client.model.You2MixVideoSearchResults;
 import com.you2mix.mix.client.model.Model.VideoSearchObserver;
-import com.you2mix.mix.client.model.VideoSearchResults.VideoSearchResult;
+import com.you2mix.mix.client.model.You2MixVideoSearchResults.VideoSearchResult;
 
 public class You2MixSearchVideoView extends FlowPanel implements
 		VideoSearchObserver,MouseUpHandler, MouseDownHandler, MouseMoveHandler {
 
 	private StackPanel resultsPanel;
 	private final TextBox searchTextBox;
-	private VideoCanvas currentnote;
+	private You2MixVideoData currentnote;
 	private Model model;
 	private SurfaceView surfaceView;
 	DivElement titleElement;
@@ -141,7 +141,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 	}
 
 	@Override
-	public void onStreamReceived(VideoSearchResults results) {
+	public void onStreamReceived(You2MixVideoSearchResults results) {
 		removeSearchResults();
 		ArrayList<VideoSearchResult> videos = results.getResults();
 		for (int i = 0; i < videos.size(); i++) {
@@ -189,7 +189,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 
 			@Override
 			public void onClick(ClickEvent event) {
-				model.updateNoteVideo(currentnote, new Video(videoSearchResult.getYouTubeID(), 0, 0));
+				model.updateNoteVideo(currentnote, new You2MixVideo(videoSearchResult.getYouTubeID(), 0, 0));
 				surfaceView.removeSearchView();
 			}
 		});
@@ -204,14 +204,14 @@ public class You2MixSearchVideoView extends FlowPanel implements
 	 * @param currentnote
 	 *            the currentnote to set
 	 */
-	public void setCurrentnote(VideoCanvas currentnote) {
+	public void setCurrentnote(You2MixVideoData currentnote) {
 		this.currentnote = currentnote;
 	}
 
 	/**
 	 * @return the currentnote
 	 */
-	public VideoCanvas getCurrentnote() {
+	public You2MixVideoData getCurrentnote() {
 		return currentnote;
 	}
 

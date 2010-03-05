@@ -7,7 +7,7 @@ import javax.jdo.annotations.PersistenceCapable;
 
 @SuppressWarnings("serial")
 @PersistenceCapable
-public class Video  implements Serializable {
+public class You2MixVideo  implements Serializable {
 
 	private String key;
 	
@@ -20,9 +20,9 @@ public class Video  implements Serializable {
 	private transient VideoObserver observer;
 	
 	@SuppressWarnings("unused")
-	private Video(){}
+	private You2MixVideo(){}
 	
-	public Video( String youTubeId, int startTime, int endTime){
+	public You2MixVideo( String youTubeId, int startTime, int endTime){
 		
 		this.youTubeID=youTubeId;
 		this.startTime=startTime;
@@ -79,7 +79,7 @@ public class Video  implements Serializable {
 	
 	
 	
-	Video update(Model model, Video video) {
+	You2MixVideo update(Model model, You2MixVideo video) {
 	    if (!video.getLastUpdatedAt().equals(lastUpdatedAt)) {
 	      youTubeID = video.youTubeID;
 	      startTime = video.startTime;
@@ -109,7 +109,7 @@ public class Video  implements Serializable {
 		return observer;
 	}
 	public interface VideoObserver{
-		 void onVideoUpdate(Video video);
+		 void onVideoUpdate(You2MixVideo video);
 	 }
 	
 }

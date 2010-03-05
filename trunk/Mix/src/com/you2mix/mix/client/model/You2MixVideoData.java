@@ -26,10 +26,10 @@ import com.google.gwt.core.client.GWT;
  * @author knorton@google.com (Kelly Norton)
  */
 @SuppressWarnings("serial")
-public class VideoCanvas implements Serializable {
+public class You2MixVideoData implements Serializable {
 
   public interface NoteObserver {
-    void onUpdate(VideoCanvas note);
+    void onUpdate(You2MixVideoData note);
   }
 
   /**
@@ -56,7 +56,7 @@ public class VideoCanvas implements Serializable {
   
   private String content;
   
-  private Video video;
+  private You2MixVideo video;
 
   /**
    * The time of the most recent update. This value is always supplied by the
@@ -76,7 +76,7 @@ public class VideoCanvas implements Serializable {
   
  
   /**
-   * An observer to receive callbacks whenever this {@link VideoCanvas} is updated.
+   * An observer to receive callbacks whenever this {@link You2MixVideoData} is updated.
    */
   private transient NoteObserver observer;
 
@@ -94,14 +94,14 @@ public class VideoCanvas implements Serializable {
    * @param width
    * @param height
    */
-  public VideoCanvas(Model model, int x, int y, int width, int height) {
+  public You2MixVideoData(Model model, int x, int y, int width, int height) {
     assert GWT.isClient();
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     ownedByCurrentUser = true;
-    this.video = new Video( "rMaTIEKIuRI", 0, 30);
+    this.video = new You2MixVideo( "rMaTIEKIuRI", 0, 30);
     
   }
 
@@ -118,8 +118,8 @@ public class VideoCanvas implements Serializable {
    * @param authorName
    * @param ownedByCurrentUser
    */
-  public VideoCanvas(String key, int x, int y, int width, int height, String content,String youTubeId,
-      Date lastUpdatedAt, String authorName, String authorEmail, Video video) {
+  public You2MixVideoData(String key, int x, int y, int width, int height, String content,String youTubeId,
+      Date lastUpdatedAt, String authorName, String authorEmail, You2MixVideo video) {
     assert !GWT.isClient();
     this.key = key;
     this.x = x;
@@ -138,7 +138,7 @@ public class VideoCanvas implements Serializable {
    * RPC.
    */
   @SuppressWarnings("unused")
-  private VideoCanvas() {
+  private You2MixVideoData() {
   }
 
  
@@ -247,7 +247,7 @@ public String getAuthorName() {
    * directly by the controlling model when the note is first received.
    * 
    * @param model
-   *          the model that owns this {@link VideoCanvas}
+   *          the model that owns this {@link You2MixVideoData}
    */
   void initialize(Model model) {
     ownedByCurrentUser = model.getCurrentAuthor().getEmail()
@@ -262,7 +262,7 @@ public String getAuthorName() {
    *          the time that the server reported for the save
    * @return <code>this</code>, for chaining purposes
    */
-  VideoCanvas update(Date lastUpdatedAt) {
+  You2MixVideoData update(Date lastUpdatedAt) {
     this.lastUpdatedAt = lastUpdatedAt;
 
     return this;
@@ -276,7 +276,7 @@ public String getAuthorName() {
    *          a note containing up-to-date information about <code>this</code>
    * @return <code>this</code>, for chaining purposes
    */
-  VideoCanvas update(VideoCanvas note) {
+  You2MixVideoData update(You2MixVideoData note) {
     if (!note.getLastUpdatedAt().equals(lastUpdatedAt)) {
       key = note.key;
       surfaceKey = note.surfaceKey;
@@ -295,7 +295,7 @@ public String getAuthorName() {
     return this;
   }
 
-  VideoCanvas update(String key, Date lastUpdatedAt) {
+  You2MixVideoData update(String key, Date lastUpdatedAt) {
     this.key = key;
     this.lastUpdatedAt = lastUpdatedAt;
 
@@ -305,14 +305,14 @@ public String getAuthorName() {
 /**
  * @param video the video to set
  */
-public void setVideo(Video video) {
+public void setVideo(You2MixVideo video) {
 	this.video = video;
 }
 
 /**
  * @return the video
  */
-public Video getVideo() {
+public You2MixVideo getVideo() {
 	return video;
 }
 
