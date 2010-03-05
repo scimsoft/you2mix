@@ -30,7 +30,7 @@ import com.you2mix.mix.client.model.Service.GetVideoResult;
  * 
  * @author knorton@google.com (Kelly Norton)
  */
-class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
+class You2MixVideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
 
   /**
    * Controls the initial laod of surfaces from the server and will retry on
@@ -60,7 +60,7 @@ class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
       assert result != null;
 
       timestamp = result.getTimestamp();
-      final Video video = result.getVideo();
+      final You2MixVideo video = result.getVideo();
       
         video.initialize(model);
         videoCache.put(video.getKey(), video);
@@ -88,7 +88,7 @@ class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
    * A cache of {@link Surface}s that have been loaded. Used to ensure that
    * there is only one instance of each surface.
    */
-  private final Map<String, Video> videoCache = new HashMap<String, Video>();
+  private final Map<String, You2MixVideo> videoCache = new HashMap<String, You2MixVideo>();
 
   /**
    * The polling period.
@@ -108,7 +108,7 @@ class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
    * @param interval
    *          the polling interval
    */
-  public VideoLoader(Model model, int interval) {
+  public You2MixVideoLoader(Model model, int interval) {
     this.model = model;
     this.interval = interval;
   }
@@ -121,9 +121,9 @@ class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
     model.onServerSucceeded();
     if (result != null) {
       timestamp = result.getTimestamp();
-      final Video video = result.getVideo();
+      final You2MixVideo video = result.getVideo();
       if(video!=null){
-        final Video existing = videoCache.get(video.getKey());
+        final You2MixVideo existing = videoCache.get(video.getKey());
         if (existing == null) {
           video.initialize(model);
           videoCache.put(video.getKey(), video);
@@ -160,7 +160,7 @@ class VideoLoader extends Timer implements AsyncCallback<GetVideoResult> {
    * @param video
    *          a reference to the surface
    */
-  void cacheSurface(String key, Video video) {
+  void cacheSurface(String key, You2MixVideo video) {
     assert key != null;
     videoCache.put(key, video);
   }

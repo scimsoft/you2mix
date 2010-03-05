@@ -36,9 +36,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.VideoCanvas;
+import com.you2mix.mix.client.model.You2MixVideoData;
 import com.you2mix.mix.client.model.Surface;
-import com.you2mix.mix.client.model.VideoSearchResults;
+import com.you2mix.mix.client.model.You2MixVideoSearchResults;
 
 /**
  * A widget to display the collection of notes that are on a particular
@@ -61,11 +61,11 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	}
 
 	/**
-	 * A widget for displaying a single {@link VideoCanvas}.
+	 * A widget for displaying a single {@link You2MixVideoData}.
 	 */
-	public class VideoCanvasView extends SimplePanel implements VideoCanvas.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
+	public class VideoCanvasView extends SimplePanel implements You2MixVideoData.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
 			ValueChangeHandler<String> {
-		private final VideoCanvas note;
+		private final You2MixVideoData note;
 
 		private final DivElement titleElement;
 
@@ -81,7 +81,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		 * @param note
 		 *            the note to render
 		 */
-		public VideoCanvasView(VideoCanvas note) {
+		public VideoCanvasView(You2MixVideoData note) {
 			this.note = note;
 			setStyleName("note");
 			note.setObserver(this);
@@ -147,7 +147,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 			}
 		}
 
-		public void onUpdate(VideoCanvas note) {
+		public void onUpdate(You2MixVideoData note) {
 			videoView.youTubeIdBox.setText(note.getVideo().getYouTubeID());
 			videoView.video.setYouTubeID(note.getVideo().getYouTubeID());
 			try {
@@ -223,7 +223,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 	}
 
-	public void onNoteCreated(VideoCanvas note) {
+	public void onNoteCreated(You2MixVideoData note) {
 		final VideoCanvasView view = new VideoCanvasView(note);
 		add(view);
 		select(view);
@@ -232,7 +232,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	public void onSurfaceCreated(Surface group) {
 	}
 
-	public void onSurfaceNotesReceived(VideoCanvas[] notes) {
+	public void onSurfaceNotesReceived(You2MixVideoData[] notes) {
 		removeAllNotes();
 		for (int i = 0, n = notes.length; i < n; ++i) {
 			add(new VideoCanvasView(notes[i]));
@@ -276,7 +276,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	}
 
 	@Override
-	public void onStreamReceived(VideoSearchResults results) {
+	public void onStreamReceived(You2MixVideoSearchResults results) {
 		// TODO Auto-generated method stub
 
 	}

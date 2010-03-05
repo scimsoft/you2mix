@@ -47,10 +47,10 @@ public interface ServiceAsync {
       AsyncCallback<Date> callback);
 
   
-  void changeNoteVideo(String key, Video video,
+  void changeNoteVideo(String key, You2MixVideo video,
 		  AsyncCallback<Date> callback);
   
-  void changeVideo(String key, Video video,
+  void changeVideo(String key, You2MixVideo video,
 		  AsyncCallback<Date> callback);
 	
   /**
@@ -74,7 +74,7 @@ public interface ServiceAsync {
    * @param height
    * @param callback
    */
-  void createNote(String surfaceKey, int x, int y, int width, int height,Video video,
+  void createNote(String surfaceKey, int x, int y, int width, int height,You2MixVideo video,
       AsyncCallback<Service.CreateObjectResult> callback);
 
   /**

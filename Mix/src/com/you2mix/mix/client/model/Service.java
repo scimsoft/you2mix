@@ -106,9 +106,9 @@ public interface Service extends RemoteService {
      * server.
      * 
      * @param key
-     *          the key that was assigned to the new {@link VideoCanvas}
+     *          the key that was assigned to the new {@link You2MixVideoData}
      * @param updateTime
-     *          the time assigned to {@link VideoCanvas#getLastUpdatedAt()}
+     *          the time assigned to {@link You2MixVideoData#getLastUpdatedAt()}
      */
     public CreateObjectResult(String key, Date updateTime) {
       assert !GWT.isClient();
@@ -124,7 +124,7 @@ public interface Service extends RemoteService {
     }
 
     /**
-     * Returns the key that was assigned to the new {@link VideoCanvas}.
+     * Returns the key that was assigned to the new {@link You2MixVideoData}.
      * 
      * @return
      */
@@ -134,7 +134,7 @@ public interface Service extends RemoteService {
 
     /**
      * Returns the {@link Date} that was assigned to
-     * {@link VideoCanvas#getLastUpdatedAt()} by the server.
+     * {@link You2MixVideoData#getLastUpdatedAt()} by the server.
      * 
      * @return
      */
@@ -145,9 +145,9 @@ public interface Service extends RemoteService {
 @SuppressWarnings("serial")
 static class GetVideoResult implements Serializable{
 	private String timestamp;
-	private Video videos;
+	private You2MixVideo videos;
 	
-	public GetVideoResult(String timestamp, Video video) {
+	public GetVideoResult(String timestamp, You2MixVideo video) {
 	      assert !GWT.isClient();
 	      this.timestamp = timestamp;
 	      this.videos = video;
@@ -166,7 +166,7 @@ static class GetVideoResult implements Serializable{
      * 
      * @return
      */
-    public Video getVideo() {
+    public You2MixVideo getVideo() {
       return videos;
     }
 
@@ -188,7 +188,7 @@ static class GetVideoResult implements Serializable{
   static class GetNotesResult implements Serializable {
     private String timestamp;
 
-    private VideoCanvas[] notes;
+    private You2MixVideoData[] notes;
 
     /**
      * Constructs a new result. This constructor can only be invoked on the
@@ -199,7 +199,7 @@ static class GetVideoResult implements Serializable{
      * @param notes
      *          the list of notes to return
      */
-    public GetNotesResult(String timestamp, VideoCanvas[] notes) {
+    public GetNotesResult(String timestamp, You2MixVideoData[] notes) {
       assert !GWT.isClient();
       this.timestamp = timestamp;
       this.notes = notes;
@@ -218,7 +218,7 @@ static class GetVideoResult implements Serializable{
      * 
      * @return
      */
-    public VideoCanvas[] getNotes() {
+    public You2MixVideoData[] getNotes() {
       return notes;
     }
 
@@ -362,7 +362,7 @@ static class GetVideoResult implements Serializable{
       throws AccessDeniedException;
 
   /**
-   * Updates the content of a {@link VideoCanvas}.
+   * Updates the content of a {@link You2MixVideoData}.
    * 
    * @param noteKey
    *          they key of the note to modify
@@ -374,11 +374,11 @@ static class GetVideoResult implements Serializable{
   Date changeNoteContent(String noteKey, String content)
       throws AccessDeniedException;
 
-  Date changeNoteVideo(String key, Video video)throws AccessDeniedException;
+  Date changeNoteVideo(String key, You2MixVideo video)throws AccessDeniedException;
   
-  Date changeVideo(String key, Video video)throws AccessDeniedException;
+  Date changeVideo(String key, You2MixVideo video)throws AccessDeniedException;
   /**
-   * Updates the position for a {@link VideoCanvas}.
+   * Updates the position for a {@link You2MixVideoData}.
    * 
    * @param noteKey
    *          the key of the note to modify
@@ -397,7 +397,7 @@ static class GetVideoResult implements Serializable{
       throws AccessDeniedException;
 
   /**
-   * Creates a new {@link VideoCanvas}.
+   * Creates a new {@link You2MixVideoData}.
    * 
    * @param surfaceKey
    *          the key of the surface where this note will be created
@@ -413,7 +413,7 @@ static class GetVideoResult implements Serializable{
    * @throws AccessDeniedException
    */
   CreateObjectResult createNote(String surfaceKey, int x, int y, int width,
-      int height, Video video) throws AccessDeniedException;
+      int height, You2MixVideo video) throws AccessDeniedException;
  
   /**
    * Create a new {@link Surface}.

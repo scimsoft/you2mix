@@ -30,10 +30,10 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.you2mix.mix.client.model.Author;
-import com.you2mix.mix.client.model.VideoCanvas;
+import com.you2mix.mix.client.model.You2MixVideoData;
 import com.you2mix.mix.client.model.Service;
 import com.you2mix.mix.client.model.Surface;
-import com.you2mix.mix.client.model.Video;
+import com.you2mix.mix.client.model.You2MixVideo;
 
 /**
  * The server-side RPC endpoint for {@link Service}.
@@ -60,20 +60,20 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     return Long.toString(System.currentTimeMillis(), 16);
   }
 
-  private static VideoCanvas[] getNotesSinceTimestamp(VideoCanvas[] notes, String timestamp) {
+  private static You2MixVideoData[] getNotesSinceTimestamp(You2MixVideoData[] notes, String timestamp) {
     if (timestamp == null) {
       return notes;
     } else {
       // Get the actual date + padding represented by the timestamp.
       final Date since = convertTimestampToDate(timestamp);
-      final List<VideoCanvas> newNotes = new ArrayList<VideoCanvas>(notes.length);
+      final List<You2MixVideoData> newNotes = new ArrayList<You2MixVideoData>(notes.length);
       // Return only those notes that were updated after since.
-      for (VideoCanvas note : notes) {
+      for (You2MixVideoData note : notes) {
         if (note.getLastUpdatedAt().after(since)) {
           newNotes.add(note);
         }
       }
-      return newNotes.toArray(new VideoCanvas[newNotes.size()]);
+      return newNotes.toArray(new You2MixVideoData[newNotes.size()]);
     }
   }
   
@@ -84,13 +84,13 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     return KeyFactory.keyToString(note.getKey().getParent());
   }
 
-  private static VideoCanvas[] toClientNotes(Collection<Store.Note> notes) {
-    final VideoCanvas[] clients = new VideoCanvas[notes.size()];
+  private static You2MixVideoData[] toClientNotes(Collection<Store.Note> notes) {
+    final You2MixVideoData[] clients = new You2MixVideoData[notes.size()];
     int i = 0;
     for (Store.Note n : notes) {
     	Store.Video storeVideo = n.getVideo();
-      Video video = new Video(storeVideo.getYouTubeId(),storeVideo.getStartTime(),storeVideo.getEndTime());
-	clients[i++] = new VideoCanvas(KeyFactory.keyToString(n.getKey()), n.getX(), n
+      You2MixVideo video = new You2MixVideo(storeVideo.getYouTubeId(),storeVideo.getStartTime(),storeVideo.getEndTime());
+	clients[i++] = new You2MixVideoData(KeyFactory.keyToString(n.getKey()), n.getX(), n
           .getY(), n.getWidth(), n.getHeight(), n.getContent(),n.getVideoKey(), n
           .getLastUpdatedAt(), n.getAuthorName(), n.getAuthorEmail(),video);
        
@@ -213,7 +213,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
     }
   }
   @Override
-  public Date changeNoteVideo(String noteKey, Video video)
+  public Date changeNoteVideo(String noteKey, You2MixVideo video)
   		throws AccessDeniedException {
 	  final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
 	    final Store.Api api = store.getApi();
@@ -242,7 +242,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
 	    }
   }
   
-  public Date changeVideo(final String noteKey, final Video video)throws AccessDeniedException {
+  public Date changeVideo(final String noteKey, final You2MixVideo video)throws AccessDeniedException {
 	  final Store.Api api = store.getApi();
 	 
 	    try {
@@ -299,7 +299,7 @@ public class ServiceImpl extends RemoteServiceServlet implements Service {
   }
 
   public CreateObjectResult createNote(final String surfaceKey, final int x,
-      final int y, final int width, final int height, final Video video)
+      final int y, final int width, final int height, final You2MixVideo video)
       throws AccessDeniedException {
     final User user = tryGetCurrentUser(UserServiceFactory.getUserService());
     final Store.Api api = store.getApi();
@@ -419,12 +419,12 @@ public UserInfoResult getUserInfo() throws AccessDeniedException {
     }
   }
 
-  private VideoCanvas[] getNotes(User user, String surfaceKey, String since)
+  private You2MixVideoData[] getNotes(User user, String surfaceKey, String since)
       throws AccessDeniedException {
     final Store.Api api = store.getApi();
     try {
       // Attempt to load from cache.
-      final VideoCanvas[] fromCache = cache.getNotes(user, surfaceKey);
+      final You2MixVideoData[] fromCache = cache.getNotes(user, surfaceKey);
       if (fromCache != null) {
         return getNotesSinceTimestamp(fromCache, since);
       }
@@ -436,7 +436,7 @@ public UserInfoResult getUserInfo() throws AccessDeniedException {
         throw new Service.AccessDeniedException();
       }
       final Store.Surface surface = api.getSurface(key);
-      final VideoCanvas[] notes = cache.putNotes(user, surfaceKey,
+      final You2MixVideoData[] notes = cache.putNotes(user, surfaceKey,
           toClientNotes(surface.getNotes()));
       return getNotesSinceTimestamp(notes, since);
     } finally {

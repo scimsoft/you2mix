@@ -88,7 +88,7 @@ public class Model {
 	 * Manages the initial loading of notes associated with the selected surface
 	 * and polls repeatedly for changes.
 	 */
-	private final VideoCanvasLoader noteLoader = new VideoCanvasLoader(this, GET_NOTES_POLLING_INTERVAL);
+	private final You2MixVideoDataLoader noteLoader = new You2MixVideoDataLoader(this, GET_NOTES_POLLING_INTERVAL);
 
 	/**
 	 * Manages the initial loading of the list of surfaces for an author and
@@ -104,7 +104,7 @@ public class Model {
 	public interface VideoSearchObserver {
 		void onStartSearch();
 
-		void onStreamReceived(VideoSearchResults results);
+		void onStreamReceived(You2MixVideoSearchResults results);
 	}
 
 	/**
@@ -113,12 +113,12 @@ public class Model {
 	public interface DataObserver {
 
 		/**
-		 * Called when a new {@link VideoCanvas} is created.
+		 * Called when a new {@link You2MixVideoData} is created.
 		 * 
 		 * @param note
 		 *            the note that was created
 		 */
-		void onNoteCreated(VideoCanvas note);
+		void onNoteCreated(You2MixVideoData note);
 
 		/**
 		 * Called when a new {@link Surface} is created.
@@ -131,14 +131,14 @@ public class Model {
 		// void onVideoCreated(Video video);
 
 		/**
-		 * Called when an initial list of {@link VideoCanvas}s is returned from the
+		 * Called when an initial list of {@link You2MixVideoData}s is returned from the
 		 * server.
 		 * 
 		 * @param notes
-		 *            all the {@link VideoCanvas}s on the currently selected
+		 *            all the {@link You2MixVideoData}s on the currently selected
 		 *            {@link Surface}.
 		 */
-		void onSurfaceNotesReceived(VideoCanvas[] notes);
+		void onSurfaceNotesReceived(You2MixVideoData[] notes);
 
 		/**
 		 * Called when the selected {@link Surface} changes.
@@ -261,11 +261,11 @@ public class Model {
 	 * A task that manages the call to the server to create a new note.
 	 */
 	private class CreateNoteTask extends Task implements AsyncCallback<CreateObjectResult> {
-		private final VideoCanvas note;
+		private final You2MixVideoData note;
 
 		private final Surface surface;
 
-		public CreateNoteTask(Surface surface, VideoCanvas note) {
+		public CreateNoteTask(Surface surface, You2MixVideoData note) {
 			this.note = note;
 			this.surface = surface;
 		}
@@ -422,14 +422,14 @@ public class Model {
 
 	/**
 	 * A {@link Task} that manages the call to the server to update the contents
-	 * of a {@link VideoCanvas}.
+	 * of a {@link You2MixVideoData}.
 	 */
 	private class UpdateNoteContentTask extends Task implements AsyncCallback<Date> {
 		private final String content;
 
-		private final VideoCanvas note;
+		private final You2MixVideoData note;
 
-		public UpdateNoteContentTask(VideoCanvas note, String content) {
+		public UpdateNoteContentTask(You2MixVideoData note, String content) {
 			this.note = note;
 			this.content = content;
 			this.note.setVideo(note.getVideo());
@@ -451,11 +451,11 @@ public class Model {
 	}
 
 	private class UpdateNoteVideoTask extends Task implements AsyncCallback<Date> {
-		private final Video video;
+		private final You2MixVideo video;
 
-		private final VideoCanvas note;
+		private final You2MixVideoData note;
 
-		public UpdateNoteVideoTask(VideoCanvas note, Video video) {
+		public UpdateNoteVideoTask(You2MixVideoData note, You2MixVideo video) {
 			this.note = note;
 			this.video = video;
 
@@ -480,9 +480,9 @@ public class Model {
 
 	private class UpdateVideoTask extends Task implements AsyncCallback<Date> {
 
-		private Video video;
+		private You2MixVideo video;
 
-		public UpdateVideoTask(Video video) {
+		public UpdateVideoTask(You2MixVideo video) {
 			this.video = video;
 		}
 
@@ -512,14 +512,14 @@ public class Model {
 
 	/**
 	 * A {@link Task} that manages the call to the server to update the position
-	 * of a {@link VideoCanvas}.
+	 * of a {@link You2MixVideoData}.
 	 */
 	private class UpdateNotePositionTask extends Task implements AsyncCallback<Date> {
-		private final VideoCanvas note;
+		private final You2MixVideoData note;
 
 		private final int x, y, width, height;
 
-		public UpdateNotePositionTask(VideoCanvas note, int x, int y, int w, int h) {
+		public UpdateNotePositionTask(You2MixVideoData note, int x, int y, int w, int h) {
 			this.note = note;
 			this.x = x;
 			this.y = y;
@@ -625,7 +625,7 @@ public class Model {
 	 * @param height
 	 */
 	public void createNote(int x, int y, int width, int height) {
-		final VideoCanvas note = new VideoCanvas(this, x, y, width, height);
+		final You2MixVideoData note = new You2MixVideoData(this, x, y, width, height);
 		notifyNoteCreated(note);
 		taskQueue.post(new CreateNoteTask(getSelectedSurface(), note));
 	}
@@ -644,7 +644,7 @@ public class Model {
 	}
 
 	public void getYouTubeSearchResults(String searchString) {
-		final VideoSearchResults finalResult = new VideoSearchResults();
+		final You2MixVideoSearchResults finalResult = new You2MixVideoSearchResults();
 		StringBuffer jsonURL = new StringBuffer("http://gdata.youtube.com/feeds/api/videos?q=");
 		jsonURL.append(searchString);
 		jsonURL.append("&max-results=5&alt=json-in-script&callback=");
@@ -726,27 +726,27 @@ public class Model {
 	}
 
 	/**
-	 * Updates the contents of a {@link VideoCanvas} and persists the change to the
+	 * Updates the contents of a {@link You2MixVideoData} and persists the change to the
 	 * server.
 	 * 
 	 * @param note
 	 * @param content
 	 */
-	public void updateNoteContent(final VideoCanvas note, String content) {
+	public void updateNoteContent(final You2MixVideoData note, String content) {
 		taskQueue.post(new UpdateNoteContentTask(note, content));
 	}
 
-	public void updateNoteVideo(final VideoCanvas note, Video video) {
+	public void updateNoteVideo(final You2MixVideoData note, You2MixVideo video) {
 		taskQueue.post(new UpdateNoteVideoTask(note, video));
 
 	}
 
-	public void updateVideo(Video video) {
+	public void updateVideo(You2MixVideo video) {
 		taskQueue.post(new UpdateVideoTask(video));
 	}
 
 	/**
-	 * Updates the position of a {@link VideoCanvas} and persists the change to the
+	 * Updates the position of a {@link You2MixVideoData} and persists the change to the
 	 * server.
 	 * 
 	 * @param note
@@ -755,7 +755,7 @@ public class Model {
 	 * @param width
 	 * @param height
 	 */
-	public void updateNotePosition(final VideoCanvas note, int x, int y, int width, int height) {
+	public void updateNotePosition(final You2MixVideoData note, int x, int y, int width, int height) {
 		taskQueue.post(new UpdateNotePositionTask(note, x, y, width, height));
 	}
 
@@ -773,7 +773,7 @@ public class Model {
 		return statusObserver;
 	}
 
-	void notifyNoteCreated(VideoCanvas note) {
+	void notifyNoteCreated(You2MixVideoData note) {
 		for (int i = 0, n = dataObservers.size(); i < n; ++i) {
 			dataObservers.get(i).onNoteCreated(note);
 		}
@@ -785,7 +785,7 @@ public class Model {
 		}
 	}
 
-	void notifySurfaceNotesReceived(VideoCanvas[] notes) {
+	void notifySurfaceNotesReceived(You2MixVideoData[] notes) {
 		for (int i = 0, n = dataObservers.size(); i < n; ++i) {
 			dataObservers.get(i).onSurfaceNotesReceived(notes);
 		}
@@ -797,7 +797,7 @@ public class Model {
 		}
 	}
 
-	void notifyStreamObserver(VideoSearchResults results) {
+	void notifyStreamObserver(You2MixVideoSearchResults results) {
 		for (int i = 0, n = videoSearchObservers.size(); i < n; ++i) {
 			videoSearchObservers.get(i).onStreamReceived(results);
 		}
