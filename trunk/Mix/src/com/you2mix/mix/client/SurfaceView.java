@@ -75,7 +75,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 		private int dragOffsetX, dragOffsetY;
 
-		final VideoView videoView;
+		final You2MixVideoView videoView;
 
 		/**
 		 * @param note
@@ -96,7 +96,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 			content.addValueChangeHandler(this);
 
 			render();
-			videoView = new VideoView(model, note);
+			videoView = new You2MixVideoView(model, note);
 			setWidget(videoView);
 
 			// youTubeId.setValue(note.getVideoKey().getYouTubeID());
@@ -203,7 +203,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 	private int zIndex = 1;
 
-	private final SearchVideoView searchView;
+	private final You2MixSearchVideoView searchView;
 
 	
 
@@ -219,7 +219,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		elem.getStyle().setProperty("position", "absolute");
 		model.addDataObserver(this);
 		model.addStreamObserver(this);
-		searchView = new SearchVideoView(model, this);
+		searchView = new You2MixSearchVideoView(model, this);
 
 	}
 
