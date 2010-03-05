@@ -1,6 +1,5 @@
 package com.google.appengine.demos.sticky.client;
 
-import com.bramosystems.oss.player.core.client.AbstractMediaPlayer;
 import com.bramosystems.oss.player.core.client.LoadException;
 import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
 import com.bramosystems.oss.player.core.event.client.PlayStateEvent;
@@ -28,7 +27,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class VideoView extends SimplePanel implements Video.VideoObserver, PlayStateHandler {
 
 	protected final TextBox youTubeIdBox;
-	final AbstractMediaPlayer noteVideo;
+	final You2MixChromelessPlayer noteVideo;
 	private final Note note;
 
 	final Video video;
@@ -52,7 +51,7 @@ public class VideoView extends SimplePanel implements Video.VideoObserver, PlayS
 		 * The player Widget added a play state listener to treat the playback
 		 * from startime
 		 */
-		noteVideo = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), "170", "170");
+		noteVideo = You2MixMediaPlayer.createPlayerWidget(urlString.toString(),video.getStartTime(), "170", "170");
 		noteVideo.addPlayStateHandler(this);
 
 		/*
@@ -178,11 +177,12 @@ public class VideoView extends SimplePanel implements Video.VideoObserver, PlayS
 		startTime.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				video.setStartTime(Integer.parseInt(startTime.getValue()));
+				int newStartTime = Integer.parseInt(startTime.getValue()== ""?"0":startTime.getValue());
+				video.setStartTime(newStartTime);
 				model.updateNoteVideo(note, video);
 				isCued = false;
-				System.out.println("StartTime changed:" + startTime.getValue());
-				//noteVideo.setPlayPosition(Double.parseDouble(startTime.getValue()));
+				noteVideo.setStartTime(newStartTime);
+				
 
 			}
 		});

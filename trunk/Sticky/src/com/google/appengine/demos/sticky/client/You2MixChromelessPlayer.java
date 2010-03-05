@@ -7,20 +7,23 @@ import com.bramosystems.oss.player.youtube.client.PlayerParameters;
 
 public class You2MixChromelessPlayer extends ChromelessPlayer {
 
+	
+
 	private int startTime;
 
 	public You2MixChromelessPlayer(String videoURL,PlayerParameters playerParameters,int startTime, String width, String height)
-			throws PluginNotFoundException, PluginVersionException {
-		
+			throws PluginNotFoundException, PluginVersionException {		
 		super(videoURL, playerParameters, width, height);
-		this.startTime = startTime;
-		
+		this.startTime = startTime;		
 	}
 	
-	public void playerInit(){
-		System.out.println("onPLayerINIT startTime= " + startTime);
-		this.setPlayPosition(Double.parseDouble(Integer.toString(startTime)));
+	public void stopMedia(){
 		
+		pauseMedia();
+		impl.seekTo(Double.parseDouble(Integer.toString(startTime)), true);
 	}
-
+	
+	public void setStartTime(int startTime){
+		this.startTime=startTime;
+	}
 }

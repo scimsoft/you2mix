@@ -2,7 +2,6 @@ package com.google.appengine.demos.sticky.client;
 
 import java.util.ArrayList;
 
-import com.bramosystems.oss.player.core.client.AbstractMediaPlayer;
 import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
 import com.google.appengine.demos.sticky.client.SurfaceView.Images;
 import com.google.appengine.demos.sticky.client.model.Model;
@@ -150,7 +149,7 @@ public class SearchVideoView extends FlowPanel implements
 			
 			StringBuffer urlString = new StringBuffer("http://www.youtube.com/v/");			
 			urlString.append(videoSearchResult.getYouTubeID());
-			AbstractMediaPlayer playerWidget = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), "170", "170");
+			You2MixChromelessPlayer playerWidget = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), "170", "170");
 			
 
 			

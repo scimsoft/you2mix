@@ -35,7 +35,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -48,7 +47,7 @@ import com.google.gwt.user.client.ui.WidgetCollection;
  * @author knorton@google.com (Kelly Norton)
  */
 @SuppressWarnings("deprecation")
-public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.VideoSearchObserver {
+public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataObserver, Model.VideoSearchObserver {
 
 	public interface Images extends ImageBundle {
 		@Resource("surface-list-add-hv.gif")
@@ -56,7 +55,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 
 		@Resource("surface-list-add-up.gif")
 		AbstractImagePrototype surfaceListAddSurfaceButtonUp();
-		
+
 		@Resource("search_large.png")
 		AbstractImagePrototype searchViewSearchButton();
 	}
@@ -64,8 +63,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 	/**
 	 * A widget for displaying a single {@link Note}.
 	 */
-	public class NoteView extends SimplePanel implements Note.NoteObserver,
-			MouseUpHandler, MouseDownHandler, MouseMoveHandler,
+	public class NoteView extends SimplePanel implements Note.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
 			ValueChangeHandler<String> {
 		private final Note note;
 
@@ -78,6 +76,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		private int dragOffsetX, dragOffsetY;
 
 		final VideoView videoView;
+
 		/**
 		 * @param note
 		 *            the note to render
@@ -89,7 +88,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			// Build simple DOM Structure.
 			final Element elem = getElement();
 			elem.getStyle().setProperty("position", "absolute");
-			
+
 			titleElement = elem.appendChild(Document.get().createDivElement());
 			titleElement.setClassName("note-title");
 
@@ -97,15 +96,14 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			content.addValueChangeHandler(this);
 
 			render();
-			videoView = new VideoView(model,note);
+			videoView = new VideoView(model, note);
 			setWidget(videoView);
-			
-			
+
 			// youTubeId.setValue(note.getVideoKey().getYouTubeID());
 			addDomHandler(this, MouseDownEvent.getType());
 			addDomHandler(this, MouseMoveEvent.getType());
 			addDomHandler(this, MouseUpEvent.getType());
-			
+
 		}
 
 		public void onMouseDown(MouseDownEvent event) {
@@ -134,10 +132,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 
 		public void onMouseMove(MouseMoveEvent event) {
 			if (dragging) {
-				setPixelPosition(
-						event.getX() + getAbsoluteLeft() - dragOffsetX, event
-								.getY()
-								+ getAbsoluteTop() - dragOffsetY);
+				setPixelPosition(event.getX() + getAbsoluteLeft() - dragOffsetX, event.getY() + getAbsoluteTop() - dragOffsetY);
 				event.preventDefault();
 			}
 		}
@@ -147,15 +142,15 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 				dragging = false;
 				DOM.releaseCapture(getElement());
 				event.preventDefault();
-				model.updateNotePosition(note, getAbsoluteLeft(),
-						getAbsoluteTop(), note.getWidth(), note.getHeight());
+				setPadPixelPosition(this,event.getX() + getAbsoluteLeft() - dragOffsetX, event.getY() + getAbsoluteTop() - dragOffsetY);
+				model.updateNotePosition(note, getAbsoluteLeft(), getAbsoluteTop(), note.getWidth(), note.getHeight());
 			}
 		}
 
 		public void onUpdate(Note note) {
 			videoView.youTubeIdBox.setText(note.getVideo().getYouTubeID());
 			videoView.video.setYouTubeID(note.getVideo().getYouTubeID());
-			try {				
+			try {
 				videoView.loadNewVideo();
 			} catch (LoadException e) {
 				// TODO Auto-generated catch block
@@ -179,7 +174,7 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		}
 
 		private void render() {
-			setPixelPosition(note.getX(), note.getY());
+			//setPadPixelPosition(this,note.getX(), note.getY());
 			setPixelSize(note.getWidth(), note.getHeight());
 
 			titleElement.setInnerHTML(note.getAuthorName());
@@ -188,22 +183,17 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 			content.setText((noteContent == null) ? "" : noteContent);
 
 			content.setReadOnly(!note.isOwnedByCurrentUser());
-			
-		
-		
+
 		}
 
 		private void select() {
 			getElement().getStyle().setProperty("zIndex", "" + nextZIndex());
 		}
 
-		
-
 		/**
 		 * @param videoObject
 		 *            the videoObject to set
 		 */
-		
 
 	}
 
@@ -212,8 +202,10 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 	private NoteView selectedNoteView;
 
 	private int zIndex = 1;
-	
+
 	private final SearchVideoView searchView;
+
+	
 
 	/**
 	 * @param model
@@ -221,12 +213,13 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 	 */
 	public SurfaceView(Model model) {
 		this.model = model;
+		
 		final Element elem = getElement();
 		elem.setId("surface");
 		elem.getStyle().setProperty("position", "absolute");
 		model.addDataObserver(this);
 		model.addStreamObserver(this);
-		searchView = new SearchVideoView(model,this);
+		searchView = new SearchVideoView(model, this);
 
 	}
 
@@ -273,31 +266,27 @@ public class SurfaceView extends FlowPanel implements Model.DataObserver,Model.V
 		}
 
 	}
-	
-	public void addSearchView(){
-		add(searchView);
-	}
-	
-	public void  removeSearchView(){
-		remove(searchView);
+
+	public void addSearchView() {
+		addSuper(searchView);
 	}
 
-	
-
-	
+	public void removeSearchView() {
+		removeSuper(searchView);
+	}
 
 	@Override
 	public void onStreamReceived(VideoSearchResults results) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onStartSearch() {
-		if (!searchView.isAttached()){
-			add(searchView);
-			}
-		
+		if (!searchView.isAttached()) {
+			addSuper(searchView);
+		}
+
 	}
 
 }
