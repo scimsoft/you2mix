@@ -12,13 +12,15 @@
 
   <servlet-mapping>
     <servlet-name>service</servlet-name>
-    <url-pattern>/mix/service</url-pattern>
+    <url-pattern>/Mix/service</url-pattern>
   </servlet-mapping>
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>all</web-resource-name>
-      <url-pattern>/*</url-pattern>
+      <web-resource-name>all except google webtools verificacion</web-resource-name>
+      <url-pattern>/Mix.html</url-pattern>
+      <url-pattern>/Mix.css</url-pattern>
+      <url-pattern>/Mix/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
