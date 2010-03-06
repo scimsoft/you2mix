@@ -176,12 +176,18 @@ body {
 	font-size: 100%;
 	border: 1px solid #000000;
 	padding: 5px;
+	margin-bottom: 5px;
 	-moz-border-radius: 5px;
   	-webkit-border-radius: 5px;	
 	-webkit-box-shadow: -8px 5px 5px rgba(0, 0, 0, 0.3);
 }
 .gwt-StackPanelItem:HOVER{
-	background: #FEE506;
+	background: #d0c98d;
+	box-shadow: 10px 10px 5px #888; 
+	padding: 5px 5px 5px 15px;
+	}
+.gwt-StackPanelItem:ACTIVE{
+	background: #d0c98d;
 	box-shadow: 10px 10px 5px #888; 
 	padding: 5px 5px 5px 15px;
 	}
@@ -200,12 +206,13 @@ body {
 .search-view-title:hover{
 	cursor:move;
 	}
+
 .search-box-panel{
 	width: 96%;
 	margin: 5px 5px 10px 5px;
 	align: center;
 	color: #eeeeee;
-	background-color: #d0c98d;
+	background-color: #fef49e;
 	font-size: large;
 	border: 1px solid #d0c98d;
 	-moz-border-radius: 5px;
@@ -213,7 +220,7 @@ body {
 	}
 	.search-box{
 	width: 100%;
-	margin: 5px 5px 0 5px;
+	margin: 5px 5px 5px 5px;
 	text-align: left;
 	color: #000000;
 	border: 1px solid #d0c98d;
@@ -221,8 +228,11 @@ body {
     -webkit-border-radius: 2px;
 	}
 .search-button{
-	margin: 5px 5px 0 25px;
+	margin: 5px 5px 0 15px;
 	
+	}
+.close-button{
+	margin: 5px 5px 0 5px;
 	}
 .content-area{
 	font-family: sans-serif;
