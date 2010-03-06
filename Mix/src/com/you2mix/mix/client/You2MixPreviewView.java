@@ -1,5 +1,9 @@
 package com.you2mix.mix.client;
 
-public class You2MixPreviewView {
+import com.google.gwt.user.client.ui.FlowPanel;
+
+public class You2MixPreviewView extends FlowPanel{
+	
+	
 
 }

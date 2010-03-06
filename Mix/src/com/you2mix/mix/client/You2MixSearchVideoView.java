@@ -91,6 +91,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 		searchBoxPanel.add(searchTextBox);
 		
 		searchBoxPanel.add(createSearchButton(images));
+		searchBoxPanel.add(createCloseButton(images));
 		
 		add(searchBoxPanel);
 	}
@@ -118,7 +119,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 
 	private PushButton createSearchButton(final Images images) {
 		PushButton searchButton = Buttons.createPushButtonWithImageStates(images
-				.searchViewSearchButton().createImage(), "search-button",
+				.searchViewSearchButtonUp().createImage(),images.searchViewSearchButtonHv().createImage(),"search-button",
 				new ClickHandler() {
 
 					@Override
@@ -130,6 +131,22 @@ public class You2MixSearchVideoView extends FlowPanel implements
 				});
 		searchButton.setStyleName("search-button");
 		return searchButton;
+	}
+	
+	private PushButton createCloseButton(final Images images) {
+		PushButton closeButton = Buttons.createPushButtonWithImageStates(images
+				.closePanelButtonUp().createImage(),images.closePanelButtonHv().createImage(),"search-button",
+				new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						surfaceView.removeSearchView();
+
+					}
+
+				});
+		closeButton.setStyleName("close-button");
+		return closeButton;
 	}
 	
 	
