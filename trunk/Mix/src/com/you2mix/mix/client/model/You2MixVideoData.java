@@ -101,7 +101,7 @@ public class You2MixVideoData implements Serializable {
     this.width = width;
     this.height = height;
     ownedByCurrentUser = true;
-    this.video = new You2MixVideo( "rMaTIEKIuRI", 0, 30);
+    this.video = new You2MixVideo( "9Jc3WaRAwXs", 0, 30);
     
   }
 

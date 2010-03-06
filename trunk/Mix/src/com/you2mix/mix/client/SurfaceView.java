@@ -56,14 +56,23 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		@Resource("surface-list-add-up.gif")
 		AbstractImagePrototype surfaceListAddSurfaceButtonUp();
 
-		@Resource("search_large.png")
-		AbstractImagePrototype searchViewSearchButton();
+		@Resource("search-icon-up.gif")
+		AbstractImagePrototype searchViewSearchButtonUp();
+		
+		@Resource("search-icon-hv.gif")
+		AbstractImagePrototype searchViewSearchButtonHv();
+		
+		@Resource("panel-close-up.gif")
+		AbstractImagePrototype closePanelButtonUp();
+		
+		@Resource("panel-close-hv.gif")
+		AbstractImagePrototype closePanelButtonHv();
 	}
 
 	/**
 	 * A widget for displaying a single {@link You2MixVideoData}.
 	 */
-	public class VideoCanvasView extends SimplePanel implements You2MixVideoData.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
+	public class You2MixVideoDataView extends SimplePanel implements You2MixVideoData.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
 			ValueChangeHandler<String> {
 		private final You2MixVideoData note;
 
@@ -81,7 +90,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		 * @param note
 		 *            the note to render
 		 */
-		public VideoCanvasView(You2MixVideoData note) {
+		public You2MixVideoDataView(You2MixVideoData note) {
 			this.note = note;
 			setStyleName("note");
 			note.setObserver(this);
@@ -199,7 +208,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 	private final Model model;
 
-	private VideoCanvasView selectedNoteView;
+	private You2MixVideoDataView selectedNoteView;
 
 	private int zIndex = 1;
 
@@ -224,7 +233,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	}
 
 	public void onNoteCreated(You2MixVideoData note) {
-		final VideoCanvasView view = new VideoCanvasView(note);
+		final You2MixVideoDataView view = new You2MixVideoDataView(note);
 		add(view);
 		select(view);
 	}
@@ -235,9 +244,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	public void onSurfaceNotesReceived(You2MixVideoData[] notes) {
 		removeAllNotes();
 		for (int i = 0, n = notes.length; i < n; ++i) {
-			add(new VideoCanvasView(notes[i]));
-			System.out.println("video: id " + notes[i].getVideo().getYouTubeID());
-			System.out.println("video: start " + notes[i].getVideo().getStartTime());
+			add(new You2MixVideoDataView(notes[i]));
 		}
 	}
 
@@ -258,7 +265,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		}
 	}
 
-	private void select(VideoCanvasView noteView) {
+	private void select(You2MixVideoDataView noteView) {
 		assert noteView != null;
 		if (selectedNoteView != noteView) {
 			noteView.select();

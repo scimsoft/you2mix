@@ -14,7 +14,8 @@ public class You2MixChromelessPlayer extends ChromelessPlayer {
 	public You2MixChromelessPlayer(String videoURL,PlayerParameters playerParameters,int startTime, String width, String height)
 			throws PluginNotFoundException, PluginVersionException {		
 		super(videoURL, playerParameters, width, height);
-		this.startTime = startTime;		
+		this.startTime = startTime;	
+		
 	}
 	
 	public void stopMedia(){

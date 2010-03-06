@@ -59,6 +59,7 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		 * keyboardlistener attached Button to open searchVideoView
 		 */
 		ComplexPanel youTubeIDPanel = new HorizontalPanel();
+		youTubeIDPanel.setStyleName("youtube-id-search-panel");
 
 		youTubeIdBox = new TextBox();
 		initYouTubeIdBox(youTubeIDString);
@@ -133,7 +134,7 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 
 	private PushButton createSearchButton() {
 		final Images images = GWT.create(Images.class);
-		return Buttons.createPushButtonWithImageStates(images.surfaceListAddSurfaceButtonUp().createImage(), images.surfaceListAddSurfaceButtonHv()
+		return Buttons.createPushButtonWithImageStates(images.searchViewSearchButtonUp().createImage(), images.searchViewSearchButtonHv()
 				.createImage(), "surface-list-add", new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				model.onStartSearch();
