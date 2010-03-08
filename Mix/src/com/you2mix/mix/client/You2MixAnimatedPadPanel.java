@@ -115,6 +115,9 @@ public class You2MixAnimatedPadPanel extends FlowPanel {
 			newCell = getfirstFreecellCell(widget);
 		}
 		insertWidgetinCellPosistion(widget, newCell);
+		if (observer != null) {
+			this.observer.onUpdateMixPositions(getVideoList());
+		}
 	}
 
 	private CellMatrixNumber getfirstFreecellCell(Widget widget) {
@@ -193,9 +196,7 @@ public class You2MixAnimatedPadPanel extends FlowPanel {
 		final Style style = widget.getElement().getStyle();
 		style.setPropertyPx("left", newPosition.getxPos());
 		style.setPropertyPx("top", newPosition.getyPos());
-		if (observer != null) {
-			this.observer.onUpdateMixPositions(getVideoList());
-		}
+		
 	}
 
 	private CellMatrixNumber getNextCell(int horizontalcellnumber, int verticalCellNumber) {
