@@ -15,7 +15,6 @@
 
 package com.you2mix.mix.client;
 
-import com.bramosystems.oss.player.core.client.LoadException;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.EventTarget;
@@ -36,7 +35,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.WidgetCollection;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.Note;
 import com.you2mix.mix.client.model.Surface;
 import com.you2mix.mix.client.model.You2MixVideoSearchResults;
 
@@ -70,11 +69,15 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	}
 
 	/**
-	 * A widget for displaying a single {@link You2MixVideoData}.
+	 * A widget for displaying a single {@link Note}.
 	 */
-	public class You2MixVideoDataView extends SimplePanel implements You2MixVideoData.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
+	public class You2MixVideoDataView extends SimplePanel implements Note.NoteObserver, MouseUpHandler, MouseDownHandler, MouseMoveHandler,
 			ValueChangeHandler<String> {
-		private final You2MixVideoData note;
+		private final Note videoData;
+
+		public Note getVideoData() {
+			return videoData;
+		}
 
 		private final DivElement titleElement;
 
@@ -86,12 +89,14 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 		final You2MixVideoView videoView;
 
+		private boolean isNewVideo;
+
 		/**
 		 * @param note
 		 *            the note to render
 		 */
-		public You2MixVideoDataView(You2MixVideoData note) {
-			this.note = note;
+		public You2MixVideoDataView(Note note) {
+			this.videoData = note;
 			setStyleName("note");
 			note.setObserver(this);
 			// Build simple DOM Structure.
@@ -117,8 +122,8 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 		public void onMouseDown(MouseDownEvent event) {
 			SurfaceView.this.select(this);
-			searchView.setCurrentnote(note);
-			if (!note.isOwnedByCurrentUser()) {
+			searchView.setCurrentnote(videoData);
+			if (!videoData.isOwnedByCurrentUser()) {
 				return;
 			}
 
@@ -152,24 +157,18 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 				DOM.releaseCapture(getElement());
 				event.preventDefault();
 				setPadPixelPosition(this,event.getX() + getAbsoluteLeft() - dragOffsetX, event.getY() + getAbsoluteTop() - dragOffsetY);
-				model.updateNotePosition(note, getAbsoluteLeft(), getAbsoluteTop(), note.getWidth(), note.getHeight());
+				model.updateNotePosition(videoData, getAbsoluteLeft(), getAbsoluteTop(), videoData.getWidth(), videoData.getHeight());
 			}
 		}
 
-		public void onUpdate(You2MixVideoData note) {
-			videoView.youTubeIdBox.setText(note.getVideo().getYouTubeID());
-			videoView.video.setYouTubeID(note.getVideo().getYouTubeID());
-			try {
-				videoView.loadNewVideo();
-			} catch (LoadException e) {
-				// TODO Auto-generated catch block
-				System.out.println(e.toString());
-			}
+		public void onUpdate(Note note) {
+			videoView.onVideoUpdate(note.getVideo(),isNewVideo);
+			
 			render();
 		}
 
 		public void onValueChange(ValueChangeEvent<String> event) {
-			model.updateNoteContent(note, event.getValue());
+			model.updateNoteContent(videoData, event.getValue());
 		}
 
 		public void setPixelPosition(int x, int y) {
@@ -184,19 +183,24 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 		private void render() {
 			//setPadPixelPosition(this,note.getX(), note.getY());
-			setPixelSize(note.getWidth(), note.getHeight());
+			setPixelSize(videoData.getWidth(), videoData.getHeight());
 
-			titleElement.setInnerHTML(note.getAuthorName());
+			titleElement.setInnerHTML(videoData.getAuthorName());
 
-			final String noteContent = note.getContent();
+			final String noteContent = videoData.getContent();
 			content.setText((noteContent == null) ? "" : noteContent);
 
-			content.setReadOnly(!note.isOwnedByCurrentUser());
+			content.setReadOnly(!videoData.isOwnedByCurrentUser());
 
 		}
 
 		private void select() {
 			getElement().getStyle().setProperty("zIndex", "" + nextZIndex());
+		}
+
+		public void setNewVideo(boolean b) {
+			this.isNewVideo = b;
+			
 		}
 
 		/**
@@ -229,10 +233,12 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		model.addDataObserver(this);
 		model.addStreamObserver(this);
 		searchView = new You2MixSearchVideoView(model, this);
-
+		
+		
+		
 	}
 
-	public void onNoteCreated(You2MixVideoData note) {
+	public void onNoteCreated(Note note) {
 		final You2MixVideoDataView view = new You2MixVideoDataView(note);
 		add(view);
 		select(view);
@@ -241,11 +247,14 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 	public void onSurfaceCreated(Surface group) {
 	}
 
-	public void onSurfaceNotesReceived(You2MixVideoData[] notes) {
+	public void onSurfaceNotesReceived(Note[] notes) {
 		removeAllNotes();
 		for (int i = 0, n = notes.length; i < n; ++i) {
 			add(new You2MixVideoDataView(notes[i]));
 		}
+		You2MixPreviewView previewView = new You2MixPreviewView(this);
+		addSuper(previewView);
+		observer.onUpdateMixPositions(getVideoList());
 	}
 
 	public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {
@@ -267,9 +276,9 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 
 	private void select(You2MixVideoDataView noteView) {
 		assert noteView != null;
-		if (selectedNoteView != noteView) {
+		if (getSelectedNoteView() != noteView) {
 			noteView.select();
-			selectedNoteView = noteView;
+			setSelectedNoteView(noteView);
 		}
 
 	}
@@ -294,6 +303,20 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 			addSuper(searchView);
 		}
 
+	}
+
+	/**
+	 * @param selectedNoteView the selectedNoteView to set
+	 */
+	public void setSelectedNoteView(You2MixVideoDataView selectedNoteView) {
+		this.selectedNoteView = selectedNoteView;
+	}
+
+	/**
+	 * @return the selectedNoteView
+	 */
+	public You2MixVideoDataView getSelectedNoteView() {
+		return selectedNoteView;
 	}
 
 }

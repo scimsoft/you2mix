@@ -106,9 +106,9 @@ public interface Service extends RemoteService {
      * server.
      * 
      * @param key
-     *          the key that was assigned to the new {@link You2MixVideoData}
+     *          the key that was assigned to the new {@link Note}
      * @param updateTime
-     *          the time assigned to {@link You2MixVideoData#getLastUpdatedAt()}
+     *          the time assigned to {@link Note#getLastUpdatedAt()}
      */
     public CreateObjectResult(String key, Date updateTime) {
       assert !GWT.isClient();
@@ -124,7 +124,7 @@ public interface Service extends RemoteService {
     }
 
     /**
-     * Returns the key that was assigned to the new {@link You2MixVideoData}.
+     * Returns the key that was assigned to the new {@link Note}.
      * 
      * @return
      */
@@ -134,7 +134,7 @@ public interface Service extends RemoteService {
 
     /**
      * Returns the {@link Date} that was assigned to
-     * {@link You2MixVideoData#getLastUpdatedAt()} by the server.
+     * {@link Note#getLastUpdatedAt()} by the server.
      * 
      * @return
      */
@@ -188,7 +188,7 @@ static class GetVideoResult implements Serializable{
   static class GetNotesResult implements Serializable {
     private String timestamp;
 
-    private You2MixVideoData[] notes;
+    private Note[] notes;
 
     /**
      * Constructs a new result. This constructor can only be invoked on the
@@ -199,7 +199,7 @@ static class GetVideoResult implements Serializable{
      * @param notes
      *          the list of notes to return
      */
-    public GetNotesResult(String timestamp, You2MixVideoData[] notes) {
+    public GetNotesResult(String timestamp, Note[] notes) {
       assert !GWT.isClient();
       this.timestamp = timestamp;
       this.notes = notes;
@@ -218,7 +218,7 @@ static class GetVideoResult implements Serializable{
      * 
      * @return
      */
-    public You2MixVideoData[] getNotes() {
+    public Note[] getNotes() {
       return notes;
     }
 
@@ -362,7 +362,7 @@ static class GetVideoResult implements Serializable{
       throws AccessDeniedException;
 
   /**
-   * Updates the content of a {@link You2MixVideoData}.
+   * Updates the content of a {@link Note}.
    * 
    * @param noteKey
    *          they key of the note to modify
@@ -376,9 +376,9 @@ static class GetVideoResult implements Serializable{
 
   Date changeNoteVideo(String key, You2MixVideo video)throws AccessDeniedException;
   
-  Date changeVideo(String key, You2MixVideo video)throws AccessDeniedException;
+  
   /**
-   * Updates the position for a {@link You2MixVideoData}.
+   * Updates the position for a {@link Note}.
    * 
    * @param noteKey
    *          the key of the note to modify
@@ -397,7 +397,7 @@ static class GetVideoResult implements Serializable{
       throws AccessDeniedException;
 
   /**
-   * Creates a new {@link You2MixVideoData}.
+   * Creates a new {@link Note}.
    * 
    * @param surfaceKey
    *          the key of the surface where this note will be created

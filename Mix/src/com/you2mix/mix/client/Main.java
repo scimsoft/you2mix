@@ -113,7 +113,8 @@ public class Main extends RetryTimer implements EntryPoint, Model.LoadObserver,
 
     final RootPanel root = RootPanel.get();
     new HeaderView(images, root, model);
-    root.add(new SurfaceView(model));
+    SurfaceView surfaceView = new SurfaceView(model);
+    root.add(surfaceView);
   }
 
   public void onModelLoadFailed() {

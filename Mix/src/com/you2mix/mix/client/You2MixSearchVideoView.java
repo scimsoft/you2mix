@@ -3,6 +3,7 @@ package com.you2mix.mix.client;
 import java.util.ArrayList;
 
 import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
+import com.bramosystems.oss.player.youtube.client.ChromelessPlayer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -31,8 +32,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.you2mix.mix.client.SurfaceView.Images;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.You2MixVideoData;
 import com.you2mix.mix.client.model.You2MixVideo;
+import com.you2mix.mix.client.model.Note;
 import com.you2mix.mix.client.model.You2MixVideoSearchResults;
 import com.you2mix.mix.client.model.Model.VideoSearchObserver;
 import com.you2mix.mix.client.model.You2MixVideoSearchResults.VideoSearchResult;
@@ -42,7 +43,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 
 	private StackPanel resultsPanel;
 	private final TextBox searchTextBox;
-	private You2MixVideoData currentnote;
+	private Note currentnote;
 	private Model model;
 	private SurfaceView surfaceView;
 	DivElement titleElement;
@@ -63,8 +64,8 @@ public class You2MixSearchVideoView extends FlowPanel implements
 		
 		setStyleName("search-panel");		
 		elem.getStyle().setProperty("position", "absolute");
-		elem.getStyle().setPropertyPx("left", 100);
-		elem.getStyle().setPropertyPx("top", 200);
+		elem.getStyle().setPropertyPx("left", 200);
+		elem.getStyle().setPropertyPx("top", 80);
 		elem.getStyle().setProperty("zIndex", "10000");
 		
 		
@@ -166,7 +167,7 @@ public class You2MixSearchVideoView extends FlowPanel implements
 			
 			StringBuffer urlString = new StringBuffer("http://www.youtube.com/v/");			
 			urlString.append(videoSearchResult.getYouTubeID());
-			You2MixChromelessPlayer playerWidget = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), "170", "170");
+			ChromelessPlayer playerWidget = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), "170", "170");
 			
 
 			
@@ -206,7 +207,10 @@ public class You2MixSearchVideoView extends FlowPanel implements
 
 			@Override
 			public void onClick(ClickEvent event) {
+		
 				model.updateNoteVideo(currentnote, new You2MixVideo(videoSearchResult.getYouTubeID(), 0, 0));
+				surfaceView.getSelectedNoteView().setNewVideo(true);
+				resultsPanel.clear();
 				surfaceView.removeSearchView();
 			}
 		});
@@ -221,14 +225,14 @@ public class You2MixSearchVideoView extends FlowPanel implements
 	 * @param currentnote
 	 *            the currentnote to set
 	 */
-	public void setCurrentnote(You2MixVideoData currentnote) {
+	public void setCurrentnote(Note currentnote) {
 		this.currentnote = currentnote;
 	}
 
 	/**
 	 * @return the currentnote
 	 */
-	public You2MixVideoData getCurrentnote() {
+	public Note getCurrentnote() {
 		return currentnote;
 	}
 

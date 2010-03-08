@@ -1,60 +1,17 @@
 package com.you2mix.mix.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.layout.client.Layout;
-import com.google.gwt.layout.client.Layout.AnimationCallback;
-import com.google.gwt.user.client.ui.AnimatedLayout;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.LayoutCommand;
 import com.google.gwt.user.client.ui.Widget;
+import com.you2mix.mix.client.SurfaceView.You2MixVideoDataView;
+import com.you2mix.mix.client.model.You2MixVideo;
 
-public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout {
-	
-	private class PadAnimateCommand extends LayoutCommand {
-	    public PadAnimateCommand(Layout layout) {
-	      super(layout);
-	    }
+public class You2MixAnimatedPadPanel extends FlowPanel {
 
-	    @Override
-	    protected void doBeforeLayout() {
-	      doLayout();
-	    }
-	  }
-	public class CellPosition {
-		private int xPos;
-		private int yPos;
-
-		public CellPosition(int xPos, int yPos) {
-			this.xPos = xPos;
-			this.yPos = yPos;
-		}
-
-		public int getxPos() {
-			return xPos;
-		}
-
-		public int getyPos() {
-			return yPos;
-		}
-
-	}
-
-	public class CellMatrixNumber {
-		private int x;
-		private int y;
-
-		public CellMatrixNumber(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
-
-		public int getX() {
-			return x;
-		}
-
-		public int getY() {
-			return y;
-		}
+	public interface VideoMixPositionObserver {
+		void onUpdateMixPositions(ArrayList<You2MixVideo> videoDataList);
 	}
 
 	private int padWidth = 900;
@@ -80,17 +37,12 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 
 	private int numVerticalCells;
 
-	private Layout layout;
-
-	private PadAnimateCommand layoutCmd;
+	protected VideoMixPositionObserver observer;
 
 	public You2MixAnimatedPadPanel() {
 		calculateCellPositions();
-		layout = new Layout(getElement());
-	    layoutCmd = new PadAnimateCommand(layout);
-	  
+		this.setSize(Integer.toString(padWidth), Integer.toString(padHeight));
 	}
-	
 
 	public void calculateCellPositions() {
 		numHorizontalCells = (int) Math.ceil(padWidth / padCellWidth);
@@ -115,7 +67,8 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		positionWidget(widget, firtsFreeCell);
 
 	}
-	public void addSuper(Widget widget){
+
+	public void addSuper(Widget widget) {
 		super.add(widget);
 	}
 
@@ -128,11 +81,10 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		removeCellwidget(widget);
 		return super.remove(widget);
 	}
-	
-	public boolean removeSuper(Widget widget){
+
+	public boolean removeSuper(Widget widget) {
 		return super.remove(widget);
 	}
-	
 
 	private boolean removeCellwidget(Widget widget) {
 		Widget[][] newCellWidgets = new Widget[numHorizontalCells][numVerticalCells];
@@ -199,7 +151,7 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		for (int horizontalcellnumber = 0; horizontalcellnumber < numHorizontalCells - 1; horizontalcellnumber++) {
 			CellPosition currentCellPosition = cellPositions[horizontalcellnumber][0];
 			CellPosition nextCellPosition = cellPositions[horizontalcellnumber + 1][0];
-			if(x < horizontalOffset){
+			if (x < horizontalOffset) {
 				newHorizontalCellNumber = 0;
 			}
 			if (currentCellPosition.getxPos() == x) {
@@ -213,7 +165,7 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		for (int verticalCellNumber = 0; verticalCellNumber < numVerticalCells - 1; verticalCellNumber++) {
 			CellPosition currentCellPosition = cellPositions[0][verticalCellNumber];
 			CellPosition nextCellPosition = cellPositions[0][verticalCellNumber + 1];
-			if(y<verticalOffset){
+			if (y < verticalOffset) {
 				return new CellMatrixNumber(newHorizontalCellNumber, 0);
 			}
 			if (currentCellPosition.getyPos() <= y && nextCellPosition.getyPos() >= y) {
@@ -236,18 +188,18 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		}
 
 	}
-	private void doLayout(){
-		
-	}
 
 	private void positionWidget(Widget widget, CellPosition newPosition) {
 		final Style style = widget.getElement().getStyle();
 		style.setPropertyPx("left", newPosition.getxPos());
 		style.setPropertyPx("top", newPosition.getyPos());
+		if (observer != null) {
+			this.observer.onUpdateMixPositions(getVideoList());
+		}
 	}
 
 	private CellMatrixNumber getNextCell(int horizontalcellnumber, int verticalCellNumber) {
-		if (horizontalcellnumber + 1< numHorizontalCells) {
+		if (horizontalcellnumber + 1 < numHorizontalCells) {
 			return new CellMatrixNumber(horizontalcellnumber + 1, verticalCellNumber);
 		} else {
 			return new CellMatrixNumber(0, verticalCellNumber + 1);
@@ -255,22 +207,25 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 
 	}
 
-	@Override
-	public void animate(int duration) {
-		// TODO Auto-generated method stub
+	protected ArrayList<You2MixVideo> getVideoList() {
+		ArrayList<You2MixVideo> widgets = new ArrayList<You2MixVideo>();
+		for (int verticalCellNumber = 0; verticalCellNumber < numVerticalCells; verticalCellNumber++) {
+			for (int horizontalcellnumber = 0; horizontalcellnumber < numHorizontalCells; horizontalcellnumber++) {
+				if (cellWidgets[horizontalcellnumber][verticalCellNumber] != null) {
+					You2MixVideoDataView videoDataView = (You2MixVideoDataView) cellWidgets[horizontalcellnumber][verticalCellNumber];
+
+					widgets.add(videoDataView.getVideoData().getVideo());
+				}
+
+			}
+
+		}
+		return widgets;
 
 	}
 
-	@Override
-	public void animate(int duration, AnimationCallback callback) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void forceLayout() {
-		// TODO Auto-generated method stub
-
+	public void setObserver(VideoMixPositionObserver observer) {
+		this.observer = observer;
 	}
 
 	/**
@@ -333,4 +288,40 @@ public class You2MixAnimatedPadPanel extends FlowPanel implements AnimatedLayout
 		return padCellHeight;
 	}
 
+	public class CellPosition {
+		private int xPos;
+		private int yPos;
+
+		public CellPosition(int xPos, int yPos) {
+			this.xPos = xPos;
+			this.yPos = yPos;
+		}
+
+		public int getxPos() {
+			return xPos;
+		}
+
+		public int getyPos() {
+			return yPos;
+		}
+
+	}
+
+	public class CellMatrixNumber {
+		private int x;
+		private int y;
+
+		public CellMatrixNumber(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+
+		public int getX() {
+			return x;
+		}
+
+		public int getY() {
+			return y;
+		}
+	}
 }

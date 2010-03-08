@@ -17,7 +17,7 @@ public class You2MixVideo  implements Serializable {
 	
 	private int endTime;
 	
-	private transient VideoObserver observer;
+	
 	
 	@SuppressWarnings("unused")
 	private You2MixVideo(){}
@@ -84,7 +84,7 @@ public class You2MixVideo  implements Serializable {
 	      youTubeID = video.youTubeID;
 	      startTime = video.startTime;
 	      endTime = video.endTime;
-	      observer.onVideoUpdate(video);
+	      
 	    }
 	    return this;
 	  }
@@ -95,21 +95,8 @@ public class You2MixVideo  implements Serializable {
   }
 
 	
-	 /**
-	 * @param observer the observer to set
-	 */
-	public void setObserver(VideoObserver observer) {
-		this.observer = observer;
-	}
+	 
 
-	/**
-	 * @return the observer
-	 */
-	public VideoObserver getObserver() {
-		return observer;
-	}
-	public interface VideoObserver{
-		 void onVideoUpdate(You2MixVideo video);
-	 }
+	
 	
 }
