@@ -26,10 +26,10 @@ import com.google.gwt.core.client.GWT;
  * @author knorton@google.com (Kelly Norton)
  */
 @SuppressWarnings("serial")
-public class You2MixVideoData implements Serializable {
+public class Note implements Serializable {
 
   public interface NoteObserver {
-    void onUpdate(You2MixVideoData note);
+    void onUpdate(Note note);
   }
 
   /**
@@ -76,7 +76,7 @@ public class You2MixVideoData implements Serializable {
   
  
   /**
-   * An observer to receive callbacks whenever this {@link You2MixVideoData} is updated.
+   * An observer to receive callbacks whenever this {@link Note} is updated.
    */
   private transient NoteObserver observer;
 
@@ -94,7 +94,7 @@ public class You2MixVideoData implements Serializable {
    * @param width
    * @param height
    */
-  public You2MixVideoData(Model model, int x, int y, int width, int height) {
+  public Note(Model model, int x, int y, int width, int height) {
     assert GWT.isClient();
     this.x = x;
     this.y = y;
@@ -118,7 +118,7 @@ public class You2MixVideoData implements Serializable {
    * @param authorName
    * @param ownedByCurrentUser
    */
-  public You2MixVideoData(String key, int x, int y, int width, int height, String content,String youTubeId,
+  public Note(String key, int x, int y, int width, int height, String content,String youTubeId,
       Date lastUpdatedAt, String authorName, String authorEmail, You2MixVideo video) {
     assert !GWT.isClient();
     this.key = key;
@@ -138,7 +138,7 @@ public class You2MixVideoData implements Serializable {
    * RPC.
    */
   @SuppressWarnings("unused")
-  private You2MixVideoData() {
+  private Note() {
   }
 
  
@@ -247,7 +247,7 @@ public String getAuthorName() {
    * directly by the controlling model when the note is first received.
    * 
    * @param model
-   *          the model that owns this {@link You2MixVideoData}
+   *          the model that owns this {@link Note}
    */
   void initialize(Model model) {
     ownedByCurrentUser = model.getCurrentAuthor().getEmail()
@@ -262,7 +262,7 @@ public String getAuthorName() {
    *          the time that the server reported for the save
    * @return <code>this</code>, for chaining purposes
    */
-  You2MixVideoData update(Date lastUpdatedAt) {
+  Note update(Date lastUpdatedAt) {
     this.lastUpdatedAt = lastUpdatedAt;
 
     return this;
@@ -276,7 +276,7 @@ public String getAuthorName() {
    *          a note containing up-to-date information about <code>this</code>
    * @return <code>this</code>, for chaining purposes
    */
-  You2MixVideoData update(You2MixVideoData note) {
+  Note update(Note note) {
     if (!note.getLastUpdatedAt().equals(lastUpdatedAt)) {
       key = note.key;
       surfaceKey = note.surfaceKey;
@@ -295,7 +295,7 @@ public String getAuthorName() {
     return this;
   }
 
-  You2MixVideoData update(String key, Date lastUpdatedAt) {
+  Note update(String key, Date lastUpdatedAt) {
     this.key = key;
     this.lastUpdatedAt = lastUpdatedAt;
 

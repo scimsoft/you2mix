@@ -113,12 +113,12 @@ public class Model {
 	public interface DataObserver {
 
 		/**
-		 * Called when a new {@link You2MixVideoData} is created.
+		 * Called when a new {@link Note} is created.
 		 * 
 		 * @param note
 		 *            the note that was created
 		 */
-		void onNoteCreated(You2MixVideoData note);
+		void onNoteCreated(Note note);
 
 		/**
 		 * Called when a new {@link Surface} is created.
@@ -131,14 +131,14 @@ public class Model {
 		// void onVideoCreated(Video video);
 
 		/**
-		 * Called when an initial list of {@link You2MixVideoData}s is returned from the
+		 * Called when an initial list of {@link Note}s is returned from the
 		 * server.
 		 * 
 		 * @param notes
-		 *            all the {@link You2MixVideoData}s on the currently selected
+		 *            all the {@link Note}s on the currently selected
 		 *            {@link Surface}.
 		 */
-		void onSurfaceNotesReceived(You2MixVideoData[] notes);
+		void onSurfaceNotesReceived(Note[] notes);
 
 		/**
 		 * Called when the selected {@link Surface} changes.
@@ -261,11 +261,11 @@ public class Model {
 	 * A task that manages the call to the server to create a new note.
 	 */
 	private class CreateNoteTask extends Task implements AsyncCallback<CreateObjectResult> {
-		private final You2MixVideoData note;
+		private final Note note;
 
 		private final Surface surface;
 
-		public CreateNoteTask(Surface surface, You2MixVideoData note) {
+		public CreateNoteTask(Surface surface, Note note) {
 			this.note = note;
 			this.surface = surface;
 		}
@@ -422,14 +422,14 @@ public class Model {
 
 	/**
 	 * A {@link Task} that manages the call to the server to update the contents
-	 * of a {@link You2MixVideoData}.
+	 * of a {@link Note}.
 	 */
 	private class UpdateNoteContentTask extends Task implements AsyncCallback<Date> {
 		private final String content;
 
-		private final You2MixVideoData note;
+		private final Note note;
 
-		public UpdateNoteContentTask(You2MixVideoData note, String content) {
+		public UpdateNoteContentTask(Note note, String content) {
 			this.note = note;
 			this.content = content;
 			this.note.setVideo(note.getVideo());
@@ -453,9 +453,9 @@ public class Model {
 	private class UpdateNoteVideoTask extends Task implements AsyncCallback<Date> {
 		private final You2MixVideo video;
 
-		private final You2MixVideoData note;
+		private final Note note;
 
-		public UpdateNoteVideoTask(You2MixVideoData note, You2MixVideo video) {
+		public UpdateNoteVideoTask(Note note, You2MixVideo video) {
 			this.note = note;
 			this.video = video;
 
@@ -478,32 +478,7 @@ public class Model {
 		}
 	}
 
-	private class UpdateVideoTask extends Task implements AsyncCallback<Date> {
-
-		private You2MixVideo video;
-
-		public UpdateVideoTask(You2MixVideo video) {
-			this.video = video;
-		}
-
-		@Override
-		void execute() {
-			api.changeVideo(video.getKey(), video, this);
-
-		}
-
-		@Override
-		public void onFailure(Throwable caught) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onSuccess(Date result) {
-			// TODO Auto-generated method stub
-
-		}
-	}
+	
 
 	/**
 	 * A {@link Task} that manages the call to the server to update the contents
@@ -512,14 +487,14 @@ public class Model {
 
 	/**
 	 * A {@link Task} that manages the call to the server to update the position
-	 * of a {@link You2MixVideoData}.
+	 * of a {@link Note}.
 	 */
 	private class UpdateNotePositionTask extends Task implements AsyncCallback<Date> {
-		private final You2MixVideoData note;
+		private final Note note;
 
 		private final int x, y, width, height;
 
-		public UpdateNotePositionTask(You2MixVideoData note, int x, int y, int w, int h) {
+		public UpdateNotePositionTask(Note note, int x, int y, int w, int h) {
 			this.note = note;
 			this.x = x;
 			this.y = y;
@@ -625,7 +600,7 @@ public class Model {
 	 * @param height
 	 */
 	public void createNote(int x, int y, int width, int height) {
-		final You2MixVideoData note = new You2MixVideoData(this, x, y, width, height);
+		final Note note = new Note(this, x, y, width, height);
 		notifyNoteCreated(note);
 		taskQueue.post(new CreateNoteTask(getSelectedSurface(), note));
 	}
@@ -726,27 +701,25 @@ public class Model {
 	}
 
 	/**
-	 * Updates the contents of a {@link You2MixVideoData} and persists the change to the
+	 * Updates the contents of a {@link Note} and persists the change to the
 	 * server.
 	 * 
 	 * @param note
 	 * @param content
 	 */
-	public void updateNoteContent(final You2MixVideoData note, String content) {
+	public void updateNoteContent(final Note note, String content) {
 		taskQueue.post(new UpdateNoteContentTask(note, content));
 	}
 
-	public void updateNoteVideo(final You2MixVideoData note, You2MixVideo video) {
+	public void updateNoteVideo(final Note note, You2MixVideo video) {
 		taskQueue.post(new UpdateNoteVideoTask(note, video));
 
 	}
 
-	public void updateVideo(You2MixVideo video) {
-		taskQueue.post(new UpdateVideoTask(video));
-	}
+	
 
 	/**
-	 * Updates the position of a {@link You2MixVideoData} and persists the change to the
+	 * Updates the position of a {@link Note} and persists the change to the
 	 * server.
 	 * 
 	 * @param note
@@ -755,7 +728,7 @@ public class Model {
 	 * @param width
 	 * @param height
 	 */
-	public void updateNotePosition(final You2MixVideoData note, int x, int y, int width, int height) {
+	public void updateNotePosition(final Note note, int x, int y, int width, int height) {
 		taskQueue.post(new UpdateNotePositionTask(note, x, y, width, height));
 	}
 
@@ -773,7 +746,7 @@ public class Model {
 		return statusObserver;
 	}
 
-	void notifyNoteCreated(You2MixVideoData note) {
+	void notifyNoteCreated(Note note) {
 		for (int i = 0, n = dataObservers.size(); i < n; ++i) {
 			dataObservers.get(i).onNoteCreated(note);
 		}
@@ -785,7 +758,7 @@ public class Model {
 		}
 	}
 
-	void notifySurfaceNotesReceived(You2MixVideoData[] notes) {
+	void notifySurfaceNotesReceived(Note[] notes) {
 		for (int i = 0, n = dataObservers.size(); i < n; ++i) {
 			dataObservers.get(i).onSurfaceNotesReceived(notes);
 		}

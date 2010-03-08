@@ -38,7 +38,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.you2mix.mix.client.model.Author;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.Note;
 import com.you2mix.mix.client.model.Surface;
 
 /**
@@ -452,7 +452,7 @@ public class HeaderView extends FlowPanel implements Model.DataObserver,
     model.addDataObserver(this);
   }
 
-  public void onNoteCreated(You2MixVideoData note) {
+  public void onNoteCreated(Note note) {
   }
 
   public void onSurfaceCreated(Surface surface) {
@@ -460,7 +460,7 @@ public class HeaderView extends FlowPanel implements Model.DataObserver,
   
   
 
-  public void onSurfaceNotesReceived(You2MixVideoData[] notes) {
+  public void onSurfaceNotesReceived(Note[] notes) {
   }
 
   public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {

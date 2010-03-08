@@ -31,7 +31,7 @@ import com.google.gwt.user.client.ui.ImageBundle;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.Note;
 import com.you2mix.mix.client.model.Surface;
 
 /**
@@ -227,7 +227,7 @@ public class SurfaceListView extends FlowPanel implements Model.DataObserver {
     observer.onHide();
   }
 
-  public void onNoteCreated(You2MixVideoData note) {
+  public void onNoteCreated(Note note) {
   }
   
 
@@ -235,7 +235,7 @@ public class SurfaceListView extends FlowPanel implements Model.DataObserver {
     new ItemView(surface);
   }
 
-  public void onSurfaceNotesReceived(You2MixVideoData[] notes) {
+  public void onSurfaceNotesReceived(Note[] notes) {
   }
 
   public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {

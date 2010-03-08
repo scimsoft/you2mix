@@ -21,7 +21,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.users.User;
-import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.Note;
 import com.you2mix.mix.client.model.Surface;
 import com.you2mix.mix.client.model.You2MixVideo;
 
@@ -123,11 +123,11 @@ public class Cache {
    * @return a collection of notes if there is a cache entry, <code>null</code>
    *         otherwise
    */
-  public You2MixVideoData[] getNotes(User user, String surfaceKey) {
+  public Note[] getNotes(User user, String surfaceKey) {
     if (!canUserAccessNotes(user, surfaceKey)) {
       return null;
     }
-    return (You2MixVideoData[]) memcache.get(createNotesId(surfaceKey));
+    return (Note[]) memcache.get(createNotesId(surfaceKey));
   }
 
   /**
@@ -177,7 +177,7 @@ public class Cache {
    *          the collection of notes to cache
    * @return <code>notes</code>, for call chaining
    */
-  public You2MixVideoData[] putNotes(User user, String surfaceKey, You2MixVideoData[] notes) {
+  public Note[] putNotes(User user, String surfaceKey, Note[] notes) {
     memcache.put(createNotesId(surfaceKey), notes);
     allowUserToAccessNotes(user, surfaceKey);
     return notes;

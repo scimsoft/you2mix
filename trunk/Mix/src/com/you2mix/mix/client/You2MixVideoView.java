@@ -12,6 +12,8 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -21,14 +23,15 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.you2mix.mix.client.SurfaceView.Images;
 import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.You2MixVideoData;
+import com.you2mix.mix.client.model.You2MixChromelessPlayer;
 import com.you2mix.mix.client.model.You2MixVideo;
+import com.you2mix.mix.client.model.Note;
 
-public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoObserver, PlayStateHandler {
+public class You2MixVideoView extends SimplePanel implements You2MixChromelessPlayer.You2MixPlayTimeListener, PlayStateHandler {
 
 	protected final TextBox youTubeIdBox;
-	final You2MixChromelessPlayer noteVideo;
-	private final You2MixVideoData note;
+	final You2MixChromelessPlayer videoPLayerObject;
+	private final Note note;
 
 	final You2MixVideo video;
 	private boolean isCued;
@@ -37,11 +40,10 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 	private TextBox startTime;
 	private TextBox endTime;
 
-	public You2MixVideoView(final Model model, final You2MixVideoData note) {
+	public You2MixVideoView(final Model model, final Note note) {
 		this.model = model;
 		this.note = note;
 		this.video = note.getVideo();
-		video.setObserver(this);
 
 		String youTubeIDString = video.getYouTubeID();
 		StringBuffer urlString = new StringBuffer("http://www.youtube.com/v/");
@@ -51,8 +53,9 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		 * The player Widget added a play state listener to treat the playback
 		 * from startime
 		 */
-		noteVideo = You2MixMediaPlayer.createPlayerWidget(urlString.toString(),video.getStartTime(), "170", "170");
-		noteVideo.addPlayStateHandler(this);
+		videoPLayerObject = You2MixMediaPlayer.createPlayerWidget(urlString.toString(), video.getStartTime(), "170", "170");
+		videoPLayerObject.addPlayStateHandler(this);
+		videoPLayerObject.setYou2MixPlayTimeListener(this);
 
 		/*
 		 * Panel containing: TextBox to show and edit YouTubeID Has a
@@ -69,7 +72,7 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		/*
 		 * Controls of the video TODO: create new control panel
 		 */
-		CustomPlayerControl cpc = new CustomPlayerControl(noteVideo);
+		CustomPlayerControl cpc = new CustomPlayerControl(videoPLayerObject);
 
 		/*
 		 * Panel with text boxes to show and edit start end time
@@ -82,13 +85,14 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 
 		FlowPanel videoViewPanel = new FlowPanel();
 		videoViewPanel.add(youTubeIDPanel);
-		videoViewPanel.add(noteVideo);
+		videoViewPanel.add(videoPLayerObject);
 		videoViewPanel.add(cpc);
 		videoViewPanel.add(timerPanel);
 
 		add(videoViewPanel);
 		setVideoStartTime(Integer.toString(video.getStartTime()));
-		noteVideo.pauseMedia();
+		setVideoEndTime(Integer.toString(video.getEndTime()));
+		videoPLayerObject.pauseMedia();
 
 	}
 
@@ -98,7 +102,12 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		}
 
 	}
+	public void setVideoEndTime(String stime) {
+		if (stime != null) {
+			endTime.setValue(stime);
+		}
 
+	}
 	private void setYouTubeIdBoxValue(String youTubeIDString) {
 		youTubeIdBox.setValue(youTubeIDString);
 	}
@@ -108,16 +117,29 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		String youTubeTextBoxValue = note.getVideo().getYouTubeID();
 		videoUrl.append(youTubeTextBoxValue);
 		setYouTubeIdBoxValue(youTubeTextBoxValue);
-		noteVideo.loadMedia(videoUrl.toString());
+		videoPLayerObject.loadMedia(videoUrl.toString());
+		videoPLayerObject.setYou2MixPlayTimeListener(this);
 
 	}
 
-	@Override
-	public void onVideoUpdate(You2MixVideo video) {
+	public void onVideoUpdate(You2MixVideo video, boolean isNewVideo) {
 		note.setVideo(video);
+		this.video.setYouTubeID(video.getYouTubeID());
 		youTubeIdBox.setText(video.getYouTubeID());
 		startTime.setValue(Integer.toString(video.getStartTime()));
 		endTime.setValue(Integer.toString(video.getEndTime()));
+		if (isNewVideo) {
+			try {
+				loadNewVideo();
+				
+			} catch (LoadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			isNewVideo = false;
+		}else{
+			videoPLayerObject.setPlayPosition(Double.parseDouble(startTime.getValue()));
+		}
 	}
 
 	@Override
@@ -125,8 +147,10 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 		if (event.getPlayState() == PlayStateEvent.State.Started) {
 			if (!isCued) {
 				// noteVideo.stopMedia();
-				noteVideo.setPlayPosition(Double.parseDouble(startTime.getValue()));
+				videoPLayerObject.setPlayPosition(Double.parseDouble(startTime.getValue()));
+				videoPLayerObject.pauseMedia();
 				isCued = true;
+
 			}
 		}
 
@@ -172,32 +196,65 @@ public class You2MixVideoView extends SimplePanel implements You2MixVideo.VideoO
 
 		Label startTimeLabel = new Label("Start:");
 		startTimeLabel.setStyleName("video-timer-label");
+		startTimeLabel.addMouseDownHandler(new MouseDownHandler() {
+			
+			@Override
+			public void onMouseDown(MouseDownEvent event) {
+				startTime.setText(Double.toString(videoPLayerObject.getPlayPosition()/1000));
+				
+			}
+		});
 		startTime = new TextBox();
 		startTime.setValue("0");
 		startTime.setStyleName("video-start-box");
 		startTime.addKeyUpHandler(new KeyUpHandler() {
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				int newStartTime = Integer.parseInt(startTime.getValue()== ""?"0":startTime.getValue());
+				int newStartTime = Integer.parseInt(startTime.getValue() == "" ? "0" : startTime.getValue());
 				video.setStartTime(newStartTime);
 				model.updateNoteVideo(note, video);
+				videoPLayerObject.setStartTime(newStartTime);
 				isCued = false;
-				noteVideo.setStartTime(newStartTime);
-				
 
 			}
 		});
 
 		Label endTimeLabel = new Label("End:");
 		endTimeLabel.setStyleName("video-timer-label");
+		endTimeLabel.addMouseDownHandler(new MouseDownHandler() {
+			
+			@Override
+			public void onMouseDown(MouseDownEvent event) {
+				endTime.setText(Double.toString(videoPLayerObject.getPlayPosition()/1000));
+				
+			}
+		});
 		endTime = new TextBox();
 		endTime.setValue("0");
 		endTime.setStyleName("video-start-box");
-
+		endTime.addKeyUpHandler(new KeyUpHandler() {
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				int newEndTime = Integer.parseInt(endTime.getValue() == "" ? "0" : endTime.getValue());
+				video.setEndTime(newEndTime);
+				model.updateNoteVideo(note, video);
+				isCued = false;
+			}
+		});
 		timerPanel.add(startTimeLabel);
 		timerPanel.add(startTime);
 		timerPanel.add(endTimeLabel);
 		timerPanel.add(endTime);
 		return timerPanel;
+	}
+
+	@Override
+	public void onCurrentPlayTimeChange(Double currentPlayTime) {
+		System.out.println("Current time" + currentPlayTime.toString());
+		Double videoEndTime = Double.parseDouble(Integer.toString(video.getEndTime()))*1000;
+		if (videoEndTime != 0 && (currentPlayTime >= videoEndTime)) {
+			videoPLayerObject.stopMedia();
+		}
+
 	}
 }

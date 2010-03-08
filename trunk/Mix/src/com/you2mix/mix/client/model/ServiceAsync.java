@@ -50,9 +50,7 @@ public interface ServiceAsync {
   void changeNoteVideo(String key, You2MixVideo video,
 		  AsyncCallback<Date> callback);
   
-  void changeVideo(String key, You2MixVideo video,
-		  AsyncCallback<Date> callback);
-	
+ 
   /**
    * @see Service#changeNotePosition(String, int, int, int, int)
    * @param noteKey

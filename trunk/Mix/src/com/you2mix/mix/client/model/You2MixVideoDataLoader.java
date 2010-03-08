@@ -25,7 +25,7 @@ import com.you2mix.mix.client.model.Service.AccessDeniedException;
 import com.you2mix.mix.client.model.Service.GetNotesResult;
 
 /**
- * Controls all aspects of loading the set of {@link You2MixVideoData}s associated with the
+ * Controls all aspects of loading the set of {@link Note}s associated with the
  * selected {@link Surface}. This class takes care of performing (and possibly
  * retrying) a query for the initial set of Notes and then continues polling the
  * server for updates.
@@ -64,9 +64,9 @@ class You2MixVideoDataLoader {
       model.getStatusObserver().onTaskFinished();
 
       timestamp = result.getTimestamp();
-      final You2MixVideoData[] notes = result.getNotes();
+      final Note[] notes = result.getNotes();
       for (int i = 0, n = notes.length; i < n; ++i) {
-        final You2MixVideoData note = notes[i];
+        final Note note = notes[i];
         note.initialize(model);
         notesCache.put(note.getKey(), note);
       }
@@ -118,10 +118,10 @@ class You2MixVideoDataLoader {
 
       timestamp = result.getTimestamp();
 
-      final You2MixVideoData[] notes = result.getNotes();
+      final Note[] notes = result.getNotes();
       for (int i = 0, n = notes.length; i < n; ++i) {
-        final You2MixVideoData note = notes[i];
-        final You2MixVideoData existing = notesCache.get(note.getKey());
+        final Note note = notes[i];
+        final Note existing = notesCache.get(note.getKey());
         // If note does not exist, send a noted created notification.
         // Otherwise, update the note and allow it to notify its observer that
         // it changed.
@@ -157,7 +157,7 @@ class You2MixVideoDataLoader {
 
   private int activeId;
 
-  private Map<String, You2MixVideoData> notesCache = new HashMap<String, You2MixVideoData>();
+  private Map<String, Note> notesCache = new HashMap<String, Note>();
 
   /**
    * Creates a new loader that is bound to the given model.
@@ -179,7 +179,7 @@ class You2MixVideoDataLoader {
    * @param note
    *          the note
    */
-  public void cacheNote(String key, You2MixVideoData note) {
+  public void cacheNote(String key, Note note) {
     assert key != null;
     notesCache.put(key, note);
   }
@@ -205,7 +205,7 @@ class You2MixVideoDataLoader {
       startInitialLoad();
     } else {
       statusObserver.onTaskFinished();
-      model.notifySurfaceNotesReceived(new You2MixVideoData[0]);
+      model.notifySurfaceNotesReceived(new Note[0]);
       startPolling();
     }
   }
