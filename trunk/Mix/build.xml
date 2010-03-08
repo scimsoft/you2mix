@@ -65,7 +65,7 @@
     <javac srcdir="src"
         destdir="war/WEB-INF/classes"
         classpathref="backend.classpath">
-      <include name="com/google/appengine/demos/sticky/server/**" />
+      <include name="com/you2mix/mix/server/**" />
     </javac>
     <!-- enhance classes -->
     <taskdef name="enhance"
@@ -74,12 +74,12 @@
     <enhance classpathref="enhancer.classpath"
         failonerror="true">
       <fileset dir="war/WEB-INF/classes"
-          includes="com/google/appengine/demos/sticky/server/**" />
+          includes="com/you2mix/mix/server/**" />
     </enhance>
   </target>
 
   <target name="compile.frontend">
-    <compile.gwtc module="com.google.appengine.demos.sticky.Sticky"
+    <compile.gwtc module="com/you2mix/mix/Mix"
         srcdir="src"
         wardir="war"
         classpathref="frontend.classpath" />
@@ -97,7 +97,7 @@
 
   <target name="clean">
     <delete dir="war/WEB-INF/classes" />
-    <delete dir="war/sticky" />
+    <delete dir="war/Mix" />
     <delete>
       <fileset dir="war/WEB-INF/lib" includes="*.jar" />
     </delete>
