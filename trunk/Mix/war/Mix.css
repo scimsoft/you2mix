@@ -155,6 +155,10 @@ body {
 .video-timer-label{
 	margin: 2px 5px 0 5px;
 	}
+.video-timer-label:HOVER{
+	border: 1px solid #d0c98d;
+	font-weight: bold;
+	}
 .video-start-box{
 	width: 30px;
 	-moz-border-radius: 5px;
@@ -336,3 +340,25 @@ body {
 .status-view-task {
   color: #fff;
 }
+
+.preview-panel{
+	font-size: 80%;
+  background-color: #fef49e;
+  border: 1px solid #d0c98d;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -webkit-box-shadow: -8px 5px 5px rgba(0, 0, 0, 0.3);
+	
+	}
+.preview-title{
+	margin: 5px 5px 0 5px;
+	text-align: center;
+	color: #0000000;
+	background-color: #d0c98d;
+	font-size: large;
+	font-weight: bold;
+	border: 1px solid #d0c98d;
+	-moz-border-radius: 5px;
+  	-webkit-border-radius: 5px;
+	}
+	
