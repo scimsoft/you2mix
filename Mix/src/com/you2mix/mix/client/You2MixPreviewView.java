@@ -21,7 +21,7 @@ public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObs
 
 	private static final String PREVIEW_PLAYER_FOREGROUND_INDEX = "100000";
 	private static final String PREVIEW_PLAYER_BACKGROUND_INDEX = "99999";
-	
+
 	private PreviewPlayer previewPlayer;
 	private FlowPanel previewPlayerpanel;
 	private FlowPanel previewPlayerpanel2;
@@ -34,17 +34,16 @@ public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObs
 	private Style player1style;
 	private Style player2style;
 	private int currentVideo = -1;
-	
 
 	public You2MixPreviewView(SurfaceView surfaceView) {
-		  mixTimer = new Timer() {
+		mixTimer = new Timer() {
 			@Override
 			public void run() {
-				if (previewPlayer.getPlayPosition()/1000 > firstPlayerEndTime) {
+				if (previewPlayer.getPlayPosition() / 1000 > firstPlayerEndTime) {
 					switchToSecondPlayer();
 
 				}
-				if (previewPlayer2.getPlayPosition()/1000 > secondPlayerEndTime) {
+				if (previewPlayer2.getPlayPosition() / 1000 > secondPlayerEndTime) {
 					switchToFirstPlayer();
 				}
 			}
@@ -107,6 +106,7 @@ public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObs
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		preparefirstPlayer(getNextVideo());
 	}
 
 	private void switchToFirstPlayer() {
@@ -119,53 +119,74 @@ public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObs
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		prepareSecondPlayer(getNextVideo());
 	}
 
 	private void prepareVideos() {
 		if (mixdata.size() > 1) {
-			You2MixVideo firstVideo = mixdata.get(getNextVideo());
-			You2MixVideo secondVideo = mixdata.get(getNextVideo());
-			if (firstVideo != null && secondVideo != null) {
-				try {
-					previewPlayer.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(firstVideo.getYouTubeID()), Double
-							.parseDouble(Integer.toString(firstVideo.getStartTime())));
+			You2MixVideo firstVideo = getNextVideo();
+			You2MixVideo secondVideo = getNextVideo();
 
-				} catch (LoadException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			preparefirstPlayer(firstVideo);
 
-				try {
-					previewPlayer2.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(secondVideo.getYouTubeID()), Double
-							.parseDouble(Integer.toString(secondVideo.getStartTime())));
-
-				} catch (LoadException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				previewPlayer.stopMedia();				
-				previewPlayer2.stopMedia();
-				firstPlayerEndTime = Double.parseDouble(Integer.toString(firstVideo.getEndTime()));
-				secondPlayerEndTime = Double.parseDouble(Integer.toString(secondVideo.getEndTime()));
-			}
+			prepareSecondPlayer(secondVideo);
 		}
 
 	}
 
-	private int getNextVideo() {
-		currentVideo++;
-		return currentVideo;
+	private boolean prepareSecondPlayer(You2MixVideo secondVideo) {
+		if (secondVideo != null) {
+			try {
+				previewPlayer2.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(secondVideo.getYouTubeID()), Double.parseDouble(Integer
+						.toString(secondVideo.getStartTime())));
+
+			} catch (LoadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			previewPlayer2.stopMedia();
+			secondPlayerEndTime = Double.parseDouble(Integer.toString(secondVideo.getEndTime()));
+			return true;
+		}
+		return false;
+	}
+
+	private boolean preparefirstPlayer(You2MixVideo firstVideo) {
+		if (firstVideo != null) {
+			try {
+				previewPlayer.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(firstVideo.getYouTubeID()), Double.parseDouble(Integer
+						.toString(firstVideo.getStartTime())));
+
+			} catch (LoadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			previewPlayer.stopMedia();
+			firstPlayerEndTime = Double.parseDouble(Integer.toString(firstVideo.getEndTime()));
+			return true;
+		}
+		return false;
+	}
+
+	private You2MixVideo getNextVideo() {
+		if(currentVideo +1 < mixdata.size()){
+			currentVideo++;
+
+		} else {
+			currentVideo = 0;
+
+		}
+
+		return mixdata.get(currentVideo);
 	}
 
 	@Override
 	public void onUpdateMixPositions(ArrayList<You2MixVideo> videoDataList) {
 		this.mixdata = videoDataList;
-		currentVideo =-1;
+		currentVideo = -1;
 		prepareVideos();
 
 	}
-
-	
 
 }

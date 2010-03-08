@@ -200,7 +200,11 @@ public class You2MixVideoView extends SimplePanel implements You2MixChromelessPl
 			
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
-				startTime.setText(Double.toString(videoPLayerObject.getPlayPosition()/1000));
+				
+				startTime.setText(getStringfromPlayposition());
+				video.setEndTime(Integer.parseInt(getStringfromPlayposition()));
+				model.updateNoteVideo(note, video);
+				isCued = false;
 				
 			}
 		});
@@ -225,8 +229,10 @@ public class You2MixVideoView extends SimplePanel implements You2MixChromelessPl
 			
 			@Override
 			public void onMouseDown(MouseDownEvent event) {
-				endTime.setText(Double.toString(videoPLayerObject.getPlayPosition()/1000));
-				
+				endTime.setText(getStringfromPlayposition());
+				video.setEndTime(Integer.parseInt(getStringfromPlayposition()));
+				model.updateNoteVideo(note, video);
+				isCued = false;
 			}
 		});
 		endTime = new TextBox();
@@ -256,5 +262,9 @@ public class You2MixVideoView extends SimplePanel implements You2MixChromelessPl
 			videoPLayerObject.stopMedia();
 		}
 
+	}
+
+	private String getStringfromPlayposition() {
+		return Integer.toString((int)((videoPLayerObject.getPlayPosition()/1000)));
 	}
 }
