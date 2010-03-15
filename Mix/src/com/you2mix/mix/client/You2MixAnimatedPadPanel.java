@@ -12,6 +12,7 @@ public class You2MixAnimatedPadPanel extends FlowPanel {
 
 	public interface VideoMixPositionObserver {
 		void onUpdateMixPositions(ArrayList<You2MixVideo> videoDataList);
+		void onInitialMixPositionsLoaded(ArrayList<You2MixVideo> videoDataList);
 	}
 
 	private int padWidth = 900;

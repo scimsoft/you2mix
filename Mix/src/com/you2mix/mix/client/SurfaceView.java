@@ -162,8 +162,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		}
 
 		public void onUpdate(Note note) {
-			videoView.onVideoUpdate(note.getVideo(),isNewVideo);
-			
+			videoView.onVideoUpdate(note.getVideo(),isNewVideo);			
 			render();
 		}
 
@@ -254,7 +253,7 @@ public class SurfaceView extends You2MixAnimatedPadPanel implements Model.DataOb
 		}
 		You2MixPreviewView previewView = new You2MixPreviewView(this);
 		addSuper(previewView);
-		observer.onUpdateMixPositions(getVideoList());
+		observer.onInitialMixPositionsLoaded(getVideoList());
 	}
 
 	public void onSurfaceSelected(Surface nowSelected, Surface wasSelected) {
