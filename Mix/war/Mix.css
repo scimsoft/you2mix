@@ -109,6 +109,7 @@ body {
 /* notes */
 .note {
   font-size: 80%;
+  background-image: url('Mix/video_panel_back.png');
   background-color: #fef49e;
   border: 1px solid #d0c98d;
   -moz-border-radius: 5px;
