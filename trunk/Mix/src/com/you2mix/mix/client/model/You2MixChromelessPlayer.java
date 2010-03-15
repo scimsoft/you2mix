@@ -1,5 +1,6 @@
 package com.you2mix.mix.client.model;
 
+import com.bramosystems.oss.player.core.client.LoadException;
 import com.bramosystems.oss.player.core.client.PlayException;
 import com.bramosystems.oss.player.core.client.PluginNotFoundException;
 import com.bramosystems.oss.player.core.client.PluginVersionException;
@@ -15,15 +16,22 @@ public class You2MixChromelessPlayer extends ChromelessPlayer {
 	
 
 	private int startTime;
+	public int getStartTime() {
+		return startTime;
+	}
+
 	private Timer playTime;
 	private You2MixPlayTimeListener playTimeListener;
-	
-	
+	public boolean isCued;
+	private String videoUrl;
+		
 
 	public You2MixChromelessPlayer(String videoURL,PlayerParameters playerParameters,int startTime, String width, String height)
-			throws PluginNotFoundException, PluginVersionException {		
+			throws PluginNotFoundException, PluginVersionException, LoadException {		
 		super(videoURL, playerParameters, width, height);
-		this.startTime = startTime;	
+		this.setStartTime(startTime);
+		this.videoUrl = videoURL;
+		
 		playTime = new Timer() {
 			@Override
 			public void run() {				
@@ -37,7 +45,7 @@ public class You2MixChromelessPlayer extends ChromelessPlayer {
 	public void stopMedia(){
 		playTime.cancel();
 		pauseMedia();
-		impl.seekTo(Double.parseDouble(Integer.toString(startTime)), true);
+		impl.seekTo((double)startTime, true);
 	}
 	
 	public void pauseMedia(){
@@ -58,7 +66,7 @@ public class You2MixChromelessPlayer extends ChromelessPlayer {
 		playTimeListener = listener;
 	}
 
-
+	
 	
 	
 	

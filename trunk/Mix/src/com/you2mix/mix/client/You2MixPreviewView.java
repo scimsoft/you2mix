@@ -2,191 +2,147 @@ package com.you2mix.mix.client;
 
 import java.util.ArrayList;
 
-import com.bramosystems.oss.player.core.client.LoadException;
 import com.bramosystems.oss.player.core.client.PlayException;
 import com.bramosystems.oss.player.core.client.skin.CustomPlayerControl;
-import com.bramosystems.oss.player.core.event.client.PlayerStateEvent;
-import com.bramosystems.oss.player.core.event.client.PlayerStateHandler;
+import com.bramosystems.oss.player.core.event.client.PlayStateEvent;
+import com.bramosystems.oss.player.core.event.client.PlayStateHandler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.you2mix.mix.client.You2MixAnimatedPadPanel.VideoMixPositionObserver;
-import com.you2mix.mix.client.model.Model;
-import com.you2mix.mix.client.model.PreviewPlayer;
+import com.you2mix.mix.client.model.You2MixChromelessPlayer;
 import com.you2mix.mix.client.model.You2MixVideo;
+import com.you2mix.mix.client.model.You2MixChromelessPlayer.You2MixPlayTimeListener;
 
-public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObserver {
+public class You2MixPreviewView extends FlowPanel implements VideoMixPositionObserver, You2MixPlayTimeListener, PlayStateHandler {
 
 	private static final String PREVIEW_PLAYER_FOREGROUND_INDEX = "100000";
 	private static final String PREVIEW_PLAYER_BACKGROUND_INDEX = "99999";
 
-	private PreviewPlayer previewPlayer;
-	private FlowPanel previewPlayerpanel;
-	private FlowPanel previewPlayerpanel2;
-	private PreviewPlayer previewPlayer2;
 	private ArrayList<You2MixVideo> mixdata;
-
-	private Timer mixTimer;
-	private double firstPlayerEndTime;
-	protected double secondPlayerEndTime;
-	private Style player1style;
-	private Style player2style;
-	private int currentVideo = -1;
+	private ArrayList<You2MixChromelessPlayer> previewPlayersList;
+	private ArrayList<FlowPanel> previewPlayerPanelsList;
+	private int currentPlayingPreviewPlayerIndex = 0;
+	private double currentPlayerEndTime;
 
 	public You2MixPreviewView(SurfaceView surfaceView) {
-		mixTimer = new Timer() {
-			@Override
-			public void run() {
-				if (previewPlayer.getPlayPosition() / 1000 > firstPlayerEndTime) {
-					switchToSecondPlayer();
 
-				}
-				if (previewPlayer2.getPlayPosition() / 1000 > secondPlayerEndTime) {
-					switchToFirstPlayer();
-				}
-			}
-		};
+		surfaceView.setObserver(this);
+	}
 
+	private void createPreviewPlayer(You2MixVideo videoData, Boolean isFirst) {
 		Label title = new Label();
 		title.setStyleName("preview-title");
 		title.setText("Preview");
 
-		Label title2 = new Label();
-		title2.setStyleName("preview-title");
-		title2.setText("Preview");
-
-		previewPlayerpanel = new FlowPanel();
+		FlowPanel previewPlayerpanel = new FlowPanel();
 		previewPlayerpanel.setSize("310", "350");
 		previewPlayerpanel.setStyleName("preview-panel");
 		previewPlayerpanel.add(title);
-
-		previewPlayer = You2MixMediaPlayer.createPreviewPlayerWidget("", "300", "300");
+		You2MixChromelessPlayer previewPlayer;
+		previewPlayer = You2MixMediaPlayer.createPreviewPlayerWidget(getYouTubeURLStringFromYouTubeID(videoData.getYouTubeID()), videoData.getStartTime(), "300", "300");
+		previewPlayer.addPlayStateHandler(this);
+		if (isFirst)
+			this.currentPlayerEndTime = videoData.getEndTime();
+		previewPlayersList.add(previewPlayer);
 
 		previewPlayerpanel.add(previewPlayer);
-		player1style = previewPlayerpanel.getElement().getStyle();
+		Style player1style = previewPlayerpanel.getElement().getStyle();
 		player1style.setProperty("position", "absolute");
 		player1style.setPropertyPx("left", 950);
-		player1style.setPropertyPx("top", 60);
 
-		player1style.setProperty("zIndex", PREVIEW_PLAYER_FOREGROUND_INDEX);
+		player1style.setPropertyPx("top", 60);
+		if (isFirst) {
+			player1style.setProperty("zIndex", PREVIEW_PLAYER_FOREGROUND_INDEX);
+		} else {
+			player1style.setProperty("zIndex", PREVIEW_PLAYER_BACKGROUND_INDEX);
+		}
+
 		CustomPlayerControl cpc = new CustomPlayerControl(previewPlayer);
 		previewPlayerpanel.add(cpc);
-
+		previewPlayerPanelsList.add(previewPlayerpanel);
 		add(previewPlayerpanel);
+		previewPlayer.isCued = false;
+		previewPlayer.setYou2MixPlayTimeListener(this);
 
-		previewPlayerpanel2 = new FlowPanel();
-		previewPlayerpanel2.setSize("310", "350");
-		previewPlayerpanel2.setStyleName("preview-panel");
-		previewPlayerpanel2.add(title2);
-
-		previewPlayer2 = You2MixMediaPlayer.createPreviewPlayerWidget("", "300", "300");
-		previewPlayerpanel2.add(previewPlayer2);
-		player2style = previewPlayerpanel2.getElement().getStyle();
-
-		player2style.setProperty("position", "absolute");
-		player2style.setPropertyPx("left", 950);
-		player2style.setPropertyPx("top", 60);
-		player2style.setProperty("zIndex", PREVIEW_PLAYER_BACKGROUND_INDEX);
-		CustomPlayerControl cpc2 = new CustomPlayerControl(previewPlayer2);
-		previewPlayerpanel2.add(cpc2);
-		add(previewPlayerpanel2);
-		mixTimer.scheduleRepeating(500);
-		surfaceView.setObserver(this);
 	}
 
-	private void switchToSecondPlayer() {
-		previewPlayer.stopMedia();
-		player1style.setProperty("zIndex", PREVIEW_PLAYER_BACKGROUND_INDEX);
-		player2style.setProperty("zIndex", PREVIEW_PLAYER_FOREGROUND_INDEX);
+	private void switchToNextPreviewPLayer() {
+		Style currentPreviewPanel;
+		previewPlayersList.get(currentPlayingPreviewPlayerIndex).stopMedia();
+		currentPreviewPanel = previewPlayerPanelsList.get(currentPlayingPreviewPlayerIndex).getElement().getStyle();
+		currentPreviewPanel.setProperty("zIndex", PREVIEW_PLAYER_BACKGROUND_INDEX);
+
+		You2MixChromelessPlayer currentPlayer = previewPlayersList.get(getNextVideo());
+		currentPreviewPanel = previewPlayerPanelsList.get(currentPlayingPreviewPlayerIndex).getElement().getStyle();
+		currentPreviewPanel.setProperty("zIndex", PREVIEW_PLAYER_FOREGROUND_INDEX);
+		currentPlayerEndTime = mixdata.get(currentPlayingPreviewPlayerIndex).getEndTime();
 		try {
-			previewPlayer2.playMedia();
+			currentPlayer.playMedia();
 		} catch (PlayException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		preparefirstPlayer(getNextVideo());
-	}
-
-	private void switchToFirstPlayer() {
-		previewPlayer2.stopMedia();
-		player2style.setProperty("zIndex", PREVIEW_PLAYER_BACKGROUND_INDEX);
-		player1style.setProperty("zIndex", PREVIEW_PLAYER_FOREGROUND_INDEX);
-		try {
-			previewPlayer.playMedia();
-		} catch (PlayException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		prepareSecondPlayer(getNextVideo());
-	}
-
-	private void prepareVideos() {
-		if (mixdata.size() > 1) {
-			You2MixVideo firstVideo = getNextVideo();
-			You2MixVideo secondVideo = getNextVideo();
-
-			preparefirstPlayer(firstVideo);
-
-			prepareSecondPlayer(secondVideo);
-		}
 
 	}
 
-	private boolean prepareSecondPlayer(You2MixVideo secondVideo) {
-		if (secondVideo != null) {
-			try {
-				previewPlayer2.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(secondVideo.getYouTubeID()), Double.parseDouble(Integer
-						.toString(secondVideo.getStartTime())));
+	private String getYouTubeURLStringFromYouTubeID(String youTubeID) {
+		return "http://www.youtube.com/v/" + youTubeID + "&version=2&autoplay=0&enablejsapi=1";
 
-			} catch (LoadException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			previewPlayer2.stopMedia();
-			secondPlayerEndTime = Double.parseDouble(Integer.toString(secondVideo.getEndTime()));
-			return true;
-		}
-		return false;
 	}
 
-	private boolean preparefirstPlayer(You2MixVideo firstVideo) {
-		if (firstVideo != null) {
-			try {
-				previewPlayer.loadMedia(You2MixMediaPlayer.getYouTubeURLStringFromYouTubeID(firstVideo.getYouTubeID()), Double.parseDouble(Integer
-						.toString(firstVideo.getStartTime())));
-
-			} catch (LoadException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			previewPlayer.stopMedia();
-			firstPlayerEndTime = Double.parseDouble(Integer.toString(firstVideo.getEndTime()));
-			return true;
-		}
-		return false;
-	}
-
-	private You2MixVideo getNextVideo() {
-		if(currentVideo +1 < mixdata.size()){
-			currentVideo++;
+	private int getNextVideo() {
+		if (currentPlayingPreviewPlayerIndex + 1 < mixdata.size()) {
+			currentPlayingPreviewPlayerIndex++;
 
 		} else {
-			currentVideo = 0;
+			currentPlayingPreviewPlayerIndex = 0;
 
 		}
 
-		return mixdata.get(currentVideo);
+		return currentPlayingPreviewPlayerIndex;
 	}
 
 	@Override
 	public void onUpdateMixPositions(ArrayList<You2MixVideo> videoDataList) {
 		this.mixdata = videoDataList;
-		currentVideo = -1;
-		prepareVideos();
+		previewPlayersList.clear();
+		previewPlayerPanelsList.clear();
+		preparePreviewPlayers(videoDataList);
+	}
+
+	@Override
+	public void onInitialMixPositionsLoaded(ArrayList<You2MixVideo> videoDataList) {
+		this.mixdata = videoDataList;
+		preparePreviewPlayers(videoDataList);
+	}
+
+	private void preparePreviewPlayers(ArrayList<You2MixVideo> videoDataList) {
+		previewPlayersList = new ArrayList<You2MixChromelessPlayer>();
+		previewPlayerPanelsList = new ArrayList<FlowPanel>();
+		for (int videoNumber = 0; videoNumber < videoDataList.size(); videoNumber++) {
+			createPreviewPlayer(videoDataList.get(videoNumber), videoNumber == 0);
+		}
 
 	}
 
+	@Override
+	public void onPlayStateChanged(PlayStateEvent event) {
+		You2MixChromelessPlayer handledPreviewPlayer = (You2MixChromelessPlayer) event.getSource();
+		if (event.getPlayState() == PlayStateEvent.State.Started && !handledPreviewPlayer.isCued) {
+			handledPreviewPlayer.setPlayPosition((double)(handledPreviewPlayer.getStartTime()));
+			handledPreviewPlayer.pauseMedia();
+			handledPreviewPlayer.isCued = true;
+		}
+		
+	}
+
+	@Override
+	public void onCurrentPlayTimeChange(Double currentPlayTime) {
+		if (currentPlayTime / 1000 > currentPlayerEndTime) {
+			switchToNextPreviewPLayer();
+
+		}
+
+	}
 }
